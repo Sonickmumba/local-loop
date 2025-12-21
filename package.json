@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Sonickmumba/ShopNinja/issues"
   },
-  "homepage": "https://github.com/Sonickmumba/ShopNinja#readme"
+  "homepage": "https://github.com/Sonickmumba/ShopNinja#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
 }
