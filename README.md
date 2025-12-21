@@ -1,291 +1,237 @@
-<a name="readme-top"></a>
+# LocalLoop Backend API
 
-<!--
-!!! IMPORTANT !!!
-This README is an example of how you could professionally present your codebase. 
-Writing documentation is a crucial part of your work as a professional software developer and cannot be ignored. 
+A complete Express.js backend for the LocalLoop neighborhood community platform.
 
-You should modify this file to match your project and remove sections that don't apply.
+## 📋 Features
 
-REQUIRED SECTIONS:
-- Table of Contents
-- About the Project
-  - Built With
-  - Live Demo
-- Getting Started
-- Authors
-- Future Features
-- Contributing
-- Show your support
-- Acknowledgements
-- License
+- **User Authentication** - JWT-based auth with bcrypt password hashing
+- **Listings Management** - Create, read, update, delete listings (offers/needs)
+- **Real-time Messaging** - Conversations between users
+- **Trade System** - Propose, accept, and manage trades
+- **Reviews & Ratings** - Rate users after completed trades
+- **Notifications** - Real-time notifications for all activities
+- **Location-based Search** - Find listings nearby using geolocation
 
-OPTIONAL SECTIONS:
-- FAQ
+## 🗄️ Database Schema
 
-After you're finished please remove all the comments and instructions!
+### Core Tables
+- **users** - User accounts and profiles
+- **listings** - Posts for offers and needs
+- **conversations** - Chat conversations between users
+- **messages** - Individual chat messages
+- **trades** - Trade proposals and agreements
+- **reviews** - User ratings and reviews
+- **interests** - Predefined user interests
+- **user_interests** - User-interest relationships
+- **notifications** - User notifications
 
-For more information on the importance of a professional README for your repositories: https://github.com/microverseinc/curriculum-transversal-skills/blob/main/documentation/articles/readme_best_practices.md
--->
-
-<div align="center">
-  <!-- You are encouraged to replace this logo with your own! Otherwise you can also remove it. -->
-  <img src="murple_logo.png" alt="logo" width="140"  height="auto" />
-  <br/>
-
-  <h3><b>Microverse README Template</b></h3>
-
-</div>
-
-<!-- TABLE OF CONTENTS -->
-
-# 📗 Table of Contents
-
-- [📖 About the Project](#about-project)
-  - [🛠 Built With](#built-with)
-    - [Tech Stack](#tech-stack)
-    - [Key Features](#key-features)
-  - [🚀 Live Demo](#live-demo)
-- [💻 Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Setup](#setup)
-  - [Install](#install)
-  - [Usage](#usage)
-  - [Run tests](#run-tests)
-  - [Deployment](#deployment)
-- [👥 Authors](#authors)
-- [🔭 Future Features](#future-features)
-- [🤝 Contributing](#contributing)
-- [⭐️ Show your support](#support)
-- [🙏 Acknowledgements](#acknowledgements)
-- [❓ FAQ (OPTIONAL)](#faq)
-- [📝 License](#license)
-
-<!-- PROJECT DESCRIPTION -->
-
-# 📖 [your_project_name] <a name="about-project"></a>
-
-> Describe your project in 1 or 2 sentences.
-
-**[your_project__name]** is a...
-
-## 🛠 Built With <a name="built-with"></a>
-
-### Tech Stack <a name="tech-stack"></a>
-
-> Describe the tech stack and include only the relevant sections that apply to your project.
-
-<details>
-  <summary>Client</summary>
-  <ul>
-    <li><a href="https://reactjs.org/">React.js</a></li>
-  </ul>
-</details>
-
-<details>
-  <summary>Server</summary>
-  <ul>
-    <li><a href="https://expressjs.com/">Express.js</a></li>
-  </ul>
-</details>
-
-<details>
-<summary>Database</summary>
-  <ul>
-    <li><a href="https://www.postgresql.org/">PostgreSQL</a></li>
-  </ul>
-</details>
-
-<!-- Features -->
-
-### Key Features <a name="key-features"></a>
-
-> Describe between 1-3 key features of the application.
-
-- **[key_feature_1]**
-- **[key_feature_2]**
-- **[key_feature_3]**
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- LIVE DEMO -->
-
-## 🚀 Live Demo <a name="live-demo"></a>
-
-> Add a link to your deployed project.
-
-- [Live Demo Link](https://google.com)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- GETTING STARTED -->
-
-## 💻 Getting Started <a name="getting-started"></a>
-
-> Describe how a new developer could make use of your project.
-
-To get a local copy up and running, follow these steps.
+## 🚀 Getting Started
 
 ### Prerequisites
+- Node.js (v14 or higher)
+- MySQL (v8 or higher)
 
-In order to run this project you need:
+### Installation
 
-<!--
-Example command:
-
-```sh
- gem install rails
+1. Install dependencies:
+```bash
+cd backend
+npm install
 ```
- -->
 
-### Setup
-
-Clone this repository to your desired folder:
-
-<!--
-Example commands:
-
-```sh
-  cd my-folder
-  git clone git@github.com:myaccount/my-project.git
+2. Create database:
+```bash
+mysql -u root -p
+CREATE DATABASE localloop;
+exit;
 ```
---->
 
-### Install
-
-Install this project with:
-
-<!--
-Example command:
-
-```sh
-  cd my-project
-  gem install
+3. Import schema:
+```bash
+mysql -u root -p localloop < database/schema.sql
 ```
---->
 
-### Usage
-
-To run the project, execute the following command:
-
-<!--
-Example command:
-
-```sh
-  rails server
+4. Configure environment:
+```bash
+cp .env.example .env
+# Edit .env with your configuration
 ```
---->
 
-### Run tests
+5. Start server:
+```bash
+# Development
+npm run dev
 
-To run tests, run the following command:
-
-<!--
-Example command:
-
-```sh
-  bin/rails test test/models/article_test.rb
+# Production
+npm start
 ```
---->
 
-### Deployment
+## 📡 API Endpoints
 
-You can deploy this project using:
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/me` - Get current user (protected)
 
-<!--
-Example:
+### Listings
+- `GET /api/listings` - Get all listings (with filters)
+- `GET /api/listings/:id` - Get listing by ID
+- `GET /api/listings/user/:userId` - Get user's listings
+- `POST /api/listings` - Create listing (protected)
+- `PUT /api/listings/:id` - Update listing (protected)
+- `DELETE /api/listings/:id` - Delete listing (protected)
 
-```sh
+### Conversations
+- `GET /api/conversations` - Get user's conversations (protected)
+- `POST /api/conversations` - Get or create conversation (protected)
+- `GET /api/conversations/:conversationId/messages` - Get messages (protected)
+- `POST /api/conversations/messages` - Send message (protected)
+
+### Trades
+- `GET /api/trades` - Get user's trades (protected)
+- `GET /api/trades/:id` - Get trade by ID (protected)
+- `POST /api/trades` - Create trade proposal (protected)
+- `PATCH /api/trades/:id/status` - Update trade status (protected)
+
+### Reviews
+- `GET /api/reviews/user/:userId` - Get user's reviews
+- `POST /api/reviews` - Create review (protected)
+
+### Notifications
+- `GET /api/notifications` - Get notifications (protected)
+- `GET /api/notifications/unread-count` - Get unread count (protected)
+- `PATCH /api/notifications/:id/read` - Mark as read (protected)
+- `PATCH /api/notifications/read-all` - Mark all as read (protected)
+- `DELETE /api/notifications/:id` - Delete notification (protected)
+
+## 🔐 Authentication
+
+Protected endpoints require a JWT token in the Authorization header:
+```
+Authorization: Bearer <your_jwt_token>
+```
+
+## 📝 Example Requests
+
+### Register User
+```bash
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "password123",
+    "phone": "+1234567890",
+    "neighborhood": "Downtown",
+    "interests": ["int-1", "int-2"]
+  }'
+```
+
+### Create Listing
+```bash
+curl -X POST http://localhost:5000/api/listings \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "type": "offer",
+    "category": "skills",
+    "title": "Free guitar lessons",
+    "description": "Teaching beginners on weekends"
+  }'
+```
+
+### Search Listings
+```bash
+# Get all offers in skills category
+curl "http://localhost:5000/api/listings?type=offer&category=skills"
+
+# Search with location
+curl "http://localhost:5000/api/listings?lat=40.7580&lng=-73.9855&radius=5"
+
+# Search by text
+curl "http://localhost:5000/api/listings?search=guitar"
+```
+
+## 🛠️ Development
+
+### Project Structure
+```
+backend/
+├── config/
+│   └── database.js          # Database connection
+├── controllers/
+│   ├── authController.js    # Auth logic
+│   ├── listingsController.js
+│   ├── conversationsController.js
+│   ├── tradesController.js
+│   ├── reviewsController.js
+│   └── notificationsController.js
+├── middleware/
+│   ├── auth.js              # JWT authentication
+│   └── errorHandler.js      # Global error handling
+├── routes/
+│   ├── auth.js
+│   ├── listings.js
+│   ├── conversations.js
+│   ├── trades.js
+│   ├── reviews.js
+│   └── notifications.js
+├── utils/
+│   └── helpers.js           # Helper functions
+├── database/
+│   └── schema.sql           # Database schema
+├── .env.example
+├── package.json
+└── server.js                # Main server file
+```
+
+## 🔧 Environment Variables
+
+```env
+PORT=5000
+NODE_ENV=development
+
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=localloop
+
+JWT_SECRET=your_secret_key
+JWT_EXPIRES_IN=7d
+
+CORS_ORIGIN=http://localhost:3000
+```
+
+## 📊 ERD Overview
 
 ```
- -->
+users (1) ──── (M) listings
+  │                   │
+  │                   │
+  └──── (M) user_interests (M) ──── interests
+  │
+  ├──── (M) messages
+  │         │
+  │         └──── (M) conversations ──── (1) listings
+  │
+  ├──── (M) trades ──── (1) listings
+  │         │
+  │         └──── (M) reviews
+  │
+  └──── (M) notifications
+```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## 🚨 Error Handling
 
-<!-- AUTHORS -->
+All endpoints return consistent error responses:
+```json
+{
+  "success": false,
+  "message": "Error description"
+}
+```
 
-## 👥 Authors <a name="authors"></a>
+## 📄 License
 
-> Mention all of the collaborators of this project.
-
-👤 **Author1**
-
-- GitHub: [@githubhandle](https://github.com/githubhandle)
-- Twitter: [@twitterhandle](https://twitter.com/twitterhandle)
-- LinkedIn: [LinkedIn](https://linkedin.com/in/linkedinhandle)
-
-👤 **Author2**
-
-- GitHub: [@githubhandle](https://github.com/githubhandle)
-- Twitter: [@twitterhandle](https://twitter.com/twitterhandle)
-- LinkedIn: [LinkedIn](https://linkedin.com/in/linkedinhandle)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- FUTURE FEATURES -->
-
-## 🔭 Future Features <a name="future-features"></a>
-
-> Describe 1 - 3 features you will add to the project.
-
-- [ ] **[new_feature_1]**
-- [ ] **[new_feature_2]**
-- [ ] **[new_feature_3]**
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- CONTRIBUTING -->
-
-## 🤝 Contributing <a name="contributing"></a>
-
-Contributions, issues, and feature requests are welcome!
-
-Feel free to check the [issues page](../../issues/).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- SUPPORT -->
-
-## ⭐️ Show your support <a name="support"></a>
-
-> Write a message to encourage readers to support your project
-
-If you like this project...
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- ACKNOWLEDGEMENTS -->
-
-## 🙏 Acknowledgments <a name="acknowledgements"></a>
-
-> Give credit to everyone who inspired your codebase.
-
-I would like to thank...
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- FAQ (optional) -->
-
-## ❓ FAQ (OPTIONAL) <a name="faq"></a>
-
-> Add at least 2 questions new developers would ask when they decide to use your project.
-
-- **[Question_1]**
-
-  - [Answer_1]
-
-- **[Question_2]**
-
-  - [Answer_2]
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- LICENSE -->
-
-## 📝 License <a name="license"></a>
-
-This project is [MIT](./LICENSE) licensed.
-
-_NOTE: we recommend using the [MIT license](https://choosealicense.com/licenses/mit/) - you can set it up quickly by [using templates available on GitHub](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/adding-a-license-to-a-repository). You can also use [any other license](https://choosealicense.com/licenses/) if you wish._
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+This project is part of the LocalLoop application.
