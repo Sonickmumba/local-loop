@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 
 // imports routes
 const userRoutes = require('./routes/userRoutes');
+const authRoutes = require('./routes/auth')
 
 
 
@@ -46,7 +47,8 @@ app.get('/', (req, res) => {
 });
 
 // API Routes
-app.use('/api', userRoutes);
+app.use('/api/auth', authRoutes);
+// app.use('/api', userRoutes);
 
 
 
