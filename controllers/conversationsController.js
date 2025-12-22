@@ -104,3 +104,106 @@ exports.getOrCreateConversation = async (req, res, next) => {
         next(error);
     }
 }
+
+
+// Get messages in conversation
+
+exports.getMessage = async (req, res, next) => {
+    try {
+        const { conversationId } = req.params;
+        const userId = req.user.id;
+
+        // check if user is part of the conversation
+        const conversationResult = await pool.query(`SELECT * FROM conversations WHERE id = $1 AND (participant1_id = $2 OR participant2_id = $3`, [conversationId, userId, userId]);
+        const conversation = conversationResult.rows;
+
+        if (conversation.length === 0) {
+            return res.status(403).json( {
+                success: false,
+                message: "Access to messages denied "
+            });
+        }
+
+        // retrieve the message
+        const message = await pool.query(`SELECT m.*, u.name as sender_name, FROM messages m JOIN users u ON m.sender_id = u.id WHERE m.conversation_id = $1 ORDER BY m.created_at ASC`, [conversationId]);
+
+        // Mark messages as read
+        await pool.query(`UPDATE messages SET is_read = true WHERE conversation_id = $1 AND sender_id = $2`, [conversationId, userId]);
+
+        res.json({
+            success: true,
+            count: messages.length,
+            data: messages
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+// send message
+exports.sendMessage = async (req, res, next) => {
+    try {
+        const { conversationId, content } = req.body;
+        const userId = req.user.id;
+
+        // check if user is part of the conversation
+        const conversationResult = await pool.query(`SELECT * FROM conversations WHERE id = $1 AND (participant1_id = $2 OR participant2_id = $3`, [conversationId, userId, userId]);
+        const conversations = conversationResult.rows;
+
+        if (conversations.length === 0) {
+            return res.status(403).json( {
+                success: false,
+                message: "Cannot send message "
+            });
+        }
+
+        // create message
+        const messageId = generateId();
+        await pool.query(`INSERT INTO messages (id, conversation_id, sender_id, content, ) VALUES ($1, $2, $3, $4)`,[messageId, conversationId, userId, content]);
+
+        // Update conversation's last_message_at
+        await pool.query(
+            `UPDATE conversations SET last_message_at = NOW() WHERE id = $1`,
+            [conversationId]
+        );
+        
+        // Increment listing responses count in the listing table
+        await pool.query(
+        'UPDATE listings SET responses_count = responses_count + 1 WHERE id = (SELECT listing_id FROM conversations WHERE id = $1)',
+        [conversationId]
+        );
+
+
+        // Create notification for other participant
+        const conversation = conversations[0];
+        const recipientId = conversation.participant1_id === userId 
+        ? conversation.participant2_id 
+        : conversation.participant1_id;
+
+        const notificationId = generateId();
+        await pool.query(
+            `INSERT INTO notifications (id, user_id, type, title, description, reference_id)
+            VALUES ($1, $2, $3, $4, $5, $6)`,
+            [notificationId, recipientId, 'message', 'New message', content.substring(0, 100), conversationId]
+        );
+
+        const newMessageResult = await pool.query(
+            `SELECT m.*, u.name as sender_name
+            FROM messages m
+            JOIN users u ON m.sender_id = u.id
+            WHERE m.id = $1`,
+            [messageId]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: 'Message sent successfully',
+            data: newMessageResult.rows[0]
+        });
+
+
+    } catch (error) {
+        next(error);
+    }
+}

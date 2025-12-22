@@ -18,7 +18,7 @@ router.post("/", conversationsController.getOrCreateConversation);
 router.post('/messages', conversationsController.sendMessage);
 
 // GET /api/conversations/:conversationId/messages - Get messages in conversations
-router.get(":conversationId/messages", conversationsController.getMessages);
+router.get("/:conversationId/messages", conversationsController.getMessages);
 
 
 
