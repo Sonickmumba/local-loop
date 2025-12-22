@@ -1,20 +1,73 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const errorHandler = require('./middleware/errorHandler')
 const bodyParser = require('body-parser');
-const userRoutes = require('./routes/userRoutes');
+
+
+// imports routes
+// const userRoutes = require('./routes/userRoutes');
+const authRoutes = require('./routes/auth')
+
+
+
+
 
 const app = express();
-const PORT = process.env.DB_PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-app.use(bodyParser.json());
-app.use(cors());
-app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use('/api', userRoutes);
+// middleware
+// app.use(bodyParser.json());
+// app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  credentials: true
+}));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
+
+
+// Request logging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    message: 'LocalLoop API is running',
+    timestamp: new Date().toISOString()
+  });
+});
 
 app.get('/', (req, res) => {
   res.json({ info: 'Node.js, Express, and Postgres API Template by Sonick Mumba' });
 });
+
+// API Routes
+app.use('/api/auth', authRoutes);
+// app.use('/api', userRoutes);
+
+
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
+
+
+// Error handler (must be last)
+app.use(errorHandler);
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
+
 
 app.listen(PORT, () => {
   console.log('=================================');
