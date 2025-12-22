@@ -1,4 +1,5 @@
 const pool = require("../config/db");
+const { generateId } = require("../utils/helpers");
 
 
 
@@ -68,3 +69,38 @@ exports.getUserConversations = async (req, res, next) => {
     next(error);
   }
 };
+
+
+// get or create conversation
+exports.getOrCreateConversation = async (req, res, next) => {
+    try {
+        const { listingId, participantId } = req.body;
+        const userId = req.user.id;
+
+        if (userId === participantId) {
+            return res.status(400).json( {success: false, message: "Cannot create conversation with yourself!"});
+        }
+
+        // check if conversation already exist
+        const conversationResult = await pool.query(`SELECT * FROM conversations WHERE listing_id = $1 AND ((participant1_id = $2 AND participant2_id = $3) OR (participant1_id = $4 AND participant2_id = $5))`, [listingId, userId, participantId, participantId, userId]);
+        const conversation = conversationResult.rows;
+
+        if (conversation.length > 0) {
+            return res.json( {success: true, data: conversation[0]});
+        }
+
+        // create new conversion
+        const conversionId = generateId();
+        await pool.query(`INSERT INTO conversations (id, listing_id, participant1_id, participant2_id) VALUES ($1, $2, $3, $4)`, [conversionId, listingId, userId, participantId]);
+
+        const newConversion = await pool.query(`SELECT * FROM conversations WHERE id = $1`, [conversionId]);
+
+        res.status(201).json( {
+            success: true,
+            message: "Conversation created successfully",
+            data: newConversion[0]
+        })
+    } catch (error) {
+        next(error);
+    }
+}
