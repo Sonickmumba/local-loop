@@ -1,5 +1,5 @@
 const pool = require("../config/db");
-const { generateId } = require("../utils/helpers");
+const { generateId, timeAgo } = require("../utils/helpers");
 
 
 
@@ -75,7 +75,7 @@ exports.getUserConversations = async (req, res, next) => {
 exports.getOrCreateConversation = async (req, res, next) => {
     try {
         const { listingId, participantId } = req.body;
-        const userId = req.user.id;
+        const userId = req.user.userId;
 
         if (userId === participantId) {
             return res.status(400).json( {success: false, message: "Cannot create conversation with yourself!"});
@@ -98,17 +98,15 @@ exports.getOrCreateConversation = async (req, res, next) => {
         res.status(201).json( {
             success: true,
             message: "Conversation created successfully",
-            data: newConversion[0]
+            data: newConversion.rows[0]
         })
     } catch (error) {
         next(error);
     }
 }
 
-
 // Get messages in conversation
-
-exports.getMessage = async (req, res, next) => {
+exports.getMessages = async (req, res, next) => {
     try {
         const { conversationId } = req.params;
         const userId = req.user.id;

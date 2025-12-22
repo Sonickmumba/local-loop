@@ -9,16 +9,16 @@ const router = express.Router();
 router.use(authMiddleware);
 
 // GET /api/conversations` - Get user's conversations
-router.get("/", conversationsController.getUsersConversations);
+router.get('/', conversationsController.getUserConversations);
 
 // POST /api/conversations - Get or create conversation
-router.post("/", conversationsController.getOrCreateConversation);
+router.post('/', conversationsController.getOrCreateConversation);
 
 // POST /api/conversations/messages` - Send message
 router.post('/messages', conversationsController.sendMessage);
 
 // GET /api/conversations/:conversationId/messages - Get messages in conversations
-router.get("/:conversationId/messages", conversationsController.getMessages);
+router.get('/:conversationId/messages', conversationsController.getMessages);
 
 
 
