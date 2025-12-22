@@ -65,9 +65,8 @@ exports.register = async (req, res, next) => {
         res.status(500).send("Error registering user.");
     }
 }
-
-
-    // Login user
+    
+// Login user
 exports.login = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -131,7 +130,7 @@ exports.login = async (req, res, next) => {
 exports.getCurrentUser = async (req, res, next) => {
   try {
     // Fetch user
-    const userResult = await db.query(
+    const userResult = await pool.query(
       `SELECT id, name, email, phone, neighborhood, location_lat, location_lng,
               profile_image_url, rating, total_ratings, completed_trades, created_at
        FROM users
@@ -149,7 +148,7 @@ exports.getCurrentUser = async (req, res, next) => {
     const user = userResult.rows[0];
 
     // Fetch user interests
-    const interestsResult = await db.query(
+    const interestsResult = await pool.query(
       `SELECT i.id, i.name, i.emoji
        FROM interests i
        JOIN user_interests ui ON i.id = ui.interest_id
