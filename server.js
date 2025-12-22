@@ -1,12 +1,12 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-require("dotenv").config;
 const errorHandler = require('./middleware/errorHandler')
 const bodyParser = require('body-parser');
 
 
 // imports routes
-const userRoutes = require('./routes/userRoutes');
+// const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/auth')
 
 
@@ -14,7 +14,7 @@ const authRoutes = require('./routes/auth')
 
 
 const app = express();
-const PORT = process.env.DB_PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 
 // middleware
@@ -63,6 +63,8 @@ app.use((req, res) => {
 
 // Error handler (must be last)
 app.use(errorHandler);
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
+
 
 app.listen(PORT, () => {
   console.log('=================================');

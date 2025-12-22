@@ -14,7 +14,7 @@ exports.register = async (req, res, next) => {
             return res.status(400).json( {success: false, errors: errors.array()});
         }
 
-        const { name, email, password, phone, neighbourhood, interests } = req.body;
+        const { name, email, password, phone, neighborhood, interests } = req.body;
 
         // check if the user already exists
         const existingUsers = await pool.query(`SELECT FROM users WHERE email = $1 OR phone = $2`, [email, phone]);
@@ -31,7 +31,7 @@ exports.register = async (req, res, next) => {
 
         // create user in the database
         const userId = generateId();
-        await pool.query(`INSERT INTO users (id, name, email, password, phone, neighbourhood) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`, [userId, name, email, passwordHash, phone, neighbourhood]);
+        await pool.query(`INSERT INTO users (id, name, email, password_hash, phone, neighborhood) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`, [userId, name, email, passwordHash, phone, neighborhood]);
 
         // Add user interests if provided
     if (interests && interests.length > 0) {
