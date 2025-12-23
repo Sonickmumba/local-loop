@@ -5,8 +5,7 @@ const errorHandler = require('./middleware/errorHandler')
 const bodyParser = require('body-parser');
 
 
-// imports routes
-// const userRoutes = require('./routes/userRoutes');
+// imports routes here
 const authRoutes = require('./routes/auth')
 const conversationsRoutes = require('./routes/conversations');
 const listingsRoutes = require('./routes/listings');
@@ -19,9 +18,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 
-// middleware
-// app.use(bodyParser.json());
-// app.use(cors());
+// middleware here
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
@@ -32,13 +29,13 @@ app.use(express.urlencoded({ extended: true }));
 // app.use(bodyParser.urlencoded({ extended: true }));
 
 
-// Request logging
+// Request logging out so that one knows the url
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
 
-// Health check
+// Health check if app running
 app.get('/health', (req, res) => {
   res.json({
     success: true,
