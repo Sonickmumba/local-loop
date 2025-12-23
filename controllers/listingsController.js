@@ -104,20 +104,20 @@ exports.getListingsById = async (req, res, next) => {
         const listingsResult = await pool.query(`
             SELECT l.*, u.name AS authors_name, u.neighborhood, u.rating as author_rating,
               u.completed_trades, u.location_lat, u.location_lng
-              FFROM listings l JOIN users u ON l.user_id = u.id
+              FROM listings l JOIN users u ON l.user_id = u.id
               WHERE l.id = $1
             `, [id]);
         
          const listings = listingsResult.rows;
          
-         if (listing.length === 0) {
+         if (listings.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: "Listing not found!"
             });
          }
          
-         const listing = listings.rows[0];
+         const listing = listings[0];
         listing.timeAgo = timeAgo(listing.created_at);
 
         res.json({
@@ -282,7 +282,7 @@ exports.getUserListings = async (req, res, next) => {
 
     res.json({
       success: true,
-      count: listings.length,
+      count: userListings.length,
       data: userListings
     });
   } catch (error) {
