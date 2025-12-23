@@ -7,10 +7,7 @@ const notificationsController = require('../controllers/notificationsController'
 const router = express.Router();
 
 // since all routes are protected we do
-// router.use(authMiddleware);
-
-
-
+router.use(authMiddleware);
 
 // - `GET /api/notifications` - Get notifications (protected)
 router.get('/', notificationsController.getUserNotifications);
@@ -26,3 +23,5 @@ router.patch('/read-all', notificationsController.markAllAsRead);
 
 // - `DELETE /api/notifications/:id` - Delete notification (protected)
 router.delete('/:id', notificationsController.deleteNotification);
+
+module.exports = router;
