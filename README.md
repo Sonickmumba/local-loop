@@ -29,7 +29,7 @@ A complete Express.js backend for the LocalLoop neighborhood community platform.
 
 ### Prerequisites
 - Node.js (v14 or higher)
-- MySQL (v8 or higher)
+- postgres (v8 or higher)
 
 ### Installation
 
