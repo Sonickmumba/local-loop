@@ -8,8 +8,8 @@ const bodyParser = require('body-parser');
 // imports routes
 // const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/auth')
-const conversationsRoute = require('./routes/conversations');
-const listingsRoute = require('./routes/listings');
+const conversationsRoutes = require('./routes/conversations');
+const listingsRoutes = require('./routes/listings');
 
 
 
@@ -53,8 +53,8 @@ app.get('/', (req, res) => {
 
 // API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/conversations', conversationsRoute);
-app.use('/api/listings', listingsRoute);
+app.use('/api/conversations', conversationsRoutes);
+app.use('/api/listings', listingsRoutes);
 
 
 
