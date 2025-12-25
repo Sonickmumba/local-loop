@@ -14,7 +14,7 @@ router.get('/:id', listingsController.getListingsById);
 router.get('/user/:userId', listingsController.getUserListings);
 
 // `POST /api/listings` - Create listing (protected)
-router.post('/', listingsController.createListing);
+router.post('/', authMiddleware, listingsController.createListing);
 
 // `PUT /api/listings/:id` - Update listing (protected)
 router.put('/id', authMiddleware, listingsController.updateListing);

@@ -9,6 +9,8 @@ const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth')
 const conversationsRoutes = require('./routes/conversations');
 const listingsRoutes = require('./routes/listings');
+const notificationsRoutes = require('./routes/notifications');
+const reviewsRoutes = require('./routes/reviews');
 
 
 
@@ -52,6 +54,8 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/conversations', conversationsRoutes);
 app.use('/api/listings', listingsRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/reviews', reviewsRoutes);
 
 
 
