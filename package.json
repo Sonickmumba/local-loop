@@ -1,5 +1,5 @@
 {
-  "name": "shopninja",
+  "name": "localloop",
   "version": "1.0.0",
   "description": "<a name=\"readme-top\"></a>",
   "main": "index.js",
@@ -8,15 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Sonickmumba/ShopNinja.git"
+    "url": "git+https://github.com/Sonickmumba/localloop.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Sonickmumba/ShopNinja/issues"
+    "url": "https://github.com/Sonickmumba/localloop/issues"
   },
-  "homepage": "https://github.com/Sonickmumba/ShopNinja#readme",
+  "homepage": "https://github.com/Sonickmumba/localloop#readme",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
