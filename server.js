@@ -11,6 +11,8 @@ const conversationsRoutes = require('./routes/conversations');
 const listingsRoutes = require('./routes/listings');
 const notificationsRoutes = require('./routes/notifications');
 const reviewsRoutes = require('./routes/reviews');
+const tradesRoutes = require('./routes/trades');
+
 
 
 
@@ -56,6 +58,7 @@ app.use('/api/conversations', conversationsRoutes);
 app.use('/api/listings', listingsRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/reviews', reviewsRoutes);
+app.use('/api/trades', tradesRoutes);
 
 
 
