@@ -106,7 +106,7 @@ exports.createReview = async (req, res, next) => {
             throw err;
         }
 
-        /* ---Recalculate the rating---------- */
+        /* ---Recalculate the rating--------- */
         const ratingAggResult = await client.query(
             `SELECT
                 AVG(rating)::numeric(3,2) AS avg_rating,
