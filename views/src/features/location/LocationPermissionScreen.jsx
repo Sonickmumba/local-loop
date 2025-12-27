@@ -58,8 +58,7 @@ export const LocationPermissionScreen = () => {
 
   const handleSkip = () => {
     dispatch(setPermission('denied'));
-    // navigate('/interests');
-    onNext();
+    navigate('/interests');
   };
 
   return (
