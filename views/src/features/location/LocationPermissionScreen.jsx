@@ -10,19 +10,12 @@ import {
   setCityCountry,
 } from '../../features/location/locationPermissionSlice';
 
-// interface LocationPermissionScreenProps {
-//   onNext: () => void;
-// }
 
 export const LocationPermissionScreen = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  // const handleAllow = () => {
-  //   // In a real app, this would request geolocation permission
-  //   onNext();
-  // };
 
   const handleAllow = () => {
     if (!navigator.geolocation) {
@@ -42,16 +35,14 @@ export const LocationPermissionScreen = () => {
         dispatch(setPermission('granted'));
         dispatch(setCoords({ lat: latitude, lng: longitude }));
 
-        // Reverse-geocode
+        // Reverse-geocode to get the sit and country
         try {
           const { city, country } = await reverseGeocode(latitude, longitude);
           dispatch(setCityCountry({ city, country }));
         } catch (err) {
           console.warn('Reverse geocode failed:', err);
         }
-
-        // const { city, country } = await reverseGeocode(latitude, longitude);
-        // dispatch(setCityCountry({ city, country }));
+        
         navigate('/');
         // onNext();
       },
