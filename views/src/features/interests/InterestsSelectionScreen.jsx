@@ -1,8 +1,5 @@
 import { useState } from 'react';
-
-// interface InterestsSelectionScreenProps {
-//   onNext: () => void;
-// }
+import { useNavigate } from 'react-router-dom';
 
 const interests = [
   { id: 'gardening', label: 'Gardening', emoji: '🌱' },
@@ -16,17 +13,16 @@ const interests = [
   { id: 'reading', label: 'Reading', emoji: '📚' },
   { id: 'photography', label: 'Photography', emoji: '📷' },
   { id: 'diy', label: 'DIY Projects', emoji: '🔨' },
-  { id: 'language', label: 'Languages', emoji: '🗣️' }
+  { id: 'language', label: 'Languages', emoji: '🗣️' },
 ];
 
-export const InterestsSelectionScreen = ({ onNext }) => {
+export const InterestsSelectionScreen = () => {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState([]);
 
   const toggleInterest = (id) => {
-    setSelected(prev =>
-      prev.includes(id)
-        ? prev.filter(i => i !== id)
-        : [...prev, id]
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
   };
 
@@ -63,7 +59,7 @@ export const InterestsSelectionScreen = ({ onNext }) => {
 
       <div className="w-full max-w-2xl mx-auto">
         <button
-          onClick={onNext}
+          onClick={() => navigate('/signup')}
           disabled={selected.length < 3}
           className={`w-full py-4 rounded-full transition-colors ${
             selected.length >= 3
@@ -76,4 +72,4 @@ export const InterestsSelectionScreen = ({ onNext }) => {
       </div>
     </div>
   );
-}
+};
