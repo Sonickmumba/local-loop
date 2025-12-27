@@ -44,7 +44,6 @@ export const LocationPermissionScreen = () => {
         }
         
         navigate('/interests');
-        // onNext();
       },
       (error) => {
         setLoading(false);
@@ -52,7 +51,6 @@ export const LocationPermissionScreen = () => {
         setErrorMsg('Location access was denied. You can still use the app.');
         dispatch(setPermission('denied'));
         navigate('/interests');
-        // onNext();
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
     );
@@ -60,7 +58,8 @@ export const LocationPermissionScreen = () => {
 
   const handleSkip = () => {
     dispatch(setPermission('denied'));
-    navigate('/interests');
+    // navigate('/interests');
+    onNext();
   };
 
   return (
