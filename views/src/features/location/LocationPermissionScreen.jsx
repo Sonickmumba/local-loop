@@ -43,7 +43,7 @@ export const LocationPermissionScreen = () => {
           console.warn('Reverse geocode failed:', err);
         }
         
-        navigate('/');
+        navigate('/interests');
         // onNext();
       },
       (error) => {
@@ -51,7 +51,7 @@ export const LocationPermissionScreen = () => {
         console.warn('Location permission denied or error:', error.message);
         setErrorMsg('Location access was denied. You can still use the app.');
         dispatch(setPermission('denied'));
-        navigate('/');
+        navigate('/interests');
         // onNext();
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
@@ -60,7 +60,7 @@ export const LocationPermissionScreen = () => {
 
   const handleSkip = () => {
     dispatch(setPermission('denied'));
-    navigate('/');
+    navigate('/interests');
   };
 
   return (
