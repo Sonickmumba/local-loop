@@ -19,6 +19,9 @@ export const SigninScreen = () => {
     navigate(from, { replace: true });
   };
 
+
+
+
   return (
     <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg space-y-4">
       <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
