@@ -26,6 +26,8 @@ export const InterestsSelectionScreen = () => {
     );
   };
 
+  console.log('Selected interests:', selected); 
+
   return (
     <div className="min-h-screen flex flex-col p-6 bg-gray-50">
       <div className="flex-1 w-full max-w-2xl mx-auto">
@@ -59,7 +61,7 @@ export const InterestsSelectionScreen = () => {
 
       <div className="w-full max-w-2xl mx-auto">
         <button
-          onClick={() => navigate('/signup')}
+          onClick={() => navigate('/login')}
           disabled={selected.length < 3}
           className={`w-full py-4 rounded-full transition-colors ${
             selected.length >= 3
