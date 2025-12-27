@@ -11,8 +11,10 @@ import { useSelector } from 'react-redux';
 
 import { WelcomeScreen } from './features/welcome/WelcomeScreen';
 import { LocationPermissionScreen } from './features/location/LocationPermissionScreen';
+import { InterestsSelectionScreen } from './features/interests/InterestsSelectionScreen';
 
 import './App.css';
+
 
 function App() {
   const { permission, coords } = useSelector((s) => s.location);
@@ -24,6 +26,7 @@ function App() {
           <Route path="/" element={<Navigate to="/welcome" replace />} />
           <Route path="/welcome" element={<WelcomeScreen />} />
           <Route path="/location" element={<LocationPermissionScreen/>} />
+          <Route path="/interests" element={<InterestsSelectionScreen/>} />
         </Routes>
       </div>
     </Router>
