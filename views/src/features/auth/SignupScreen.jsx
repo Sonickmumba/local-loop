@@ -28,11 +28,11 @@ export const SignupScreen = ({ coords }) => {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
+        {/* <div className="text-center mb-8">
           <div className="text-5xl mb-4">🎉</div>
           <h1 className="mb-2">Join LocalLoop</h1>
           <p className="text-gray-600">Connect with your neighborhood</p>
-        </div>
+        </div> */}
 
         <form
           onSubmit={handleSubmit}
