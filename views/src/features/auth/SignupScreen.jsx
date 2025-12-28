@@ -3,6 +3,7 @@ import { setFormData, signupUser } from './authSlice';
 import { useNavigate } from 'react-router-dom';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { resetFormData } from './authSlice';
 
 export const SignupScreen = ({ coords }) => {
   const dispatch = useDispatch();
@@ -15,25 +16,23 @@ export const SignupScreen = ({ coords }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await dispatch(
+    const result = await dispatch(
       signupUser({
         ...formData,
         latitude: coords?.latitude,
         longitude: coords?.longitude,
       })
     );
-    navigate('/phone');
+
+    if (signupUser.fulfilled.match(result)) {
+      dispatch(resetFormData());
+      navigate('/phone');
+    } 
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
+    <div className="flex items-center justify-center p-6 bg-gray-50">
       <div className="w-full max-w-md">
-        {/* <div className="text-center mb-8">
-          <div className="text-5xl mb-4">🎉</div>
-          <h1 className="mb-2">Join LocalLoop</h1>
-          <p className="text-gray-600">Connect with your neighborhood</p>
-        </div> */}
-
         <form
           onSubmit={handleSubmit}
           className="bg-white p-8 rounded-lg border border-gray-200 space-y-4"
