@@ -61,7 +61,7 @@ export const InterestsSelectionScreen = () => {
 
       <div className="w-full max-w-2xl mx-auto">
         <button
-          onClick={() => navigate('/login')}
+          onClick={() => navigate('/auth/signin')}
           disabled={selected.length < 3}
           className={`w-full py-4 rounded-full transition-colors ${
             selected.length >= 3
