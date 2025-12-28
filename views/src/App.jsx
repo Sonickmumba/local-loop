@@ -46,7 +46,7 @@ function App() {
 
         
 
-        {/* <Route path="/login" element={<LoginSignupScreen />} /> */}
+        <Route path="/phone" element={<PhoneVerificationScreen />} />
       </Routes>
     </div>
     // </Router>
