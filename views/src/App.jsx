@@ -38,20 +38,13 @@ function App() {
         <Route path="/interests" element={<InterestsSelectionScreen />} />
         {/* <Route path="/login" element={<LoginSignupScreen />} /> */}
 
-        <Route path="/login" element={<LoginLayout />}>
+        <Route path="/auth" element={<LoginLayout />}>
           <Route index element={<Navigate to="signup" replace />} />
           <Route path="signup" element={<SignupScreen coords={coords} />} />
           <Route path="signin" element={<SigninScreen />} />
         </Route>
 
-        <Route
-        path="/phone"
-        element={
-          <RequireAuth>
-            <PhoneVerificationScreen />
-          </RequireAuth>
-        }
-      />
+        
 
         {/* <Route path="/login" element={<LoginSignupScreen />} /> */}
       </Routes>
