@@ -26,51 +26,6 @@ export const SignupScreen = ({ coords }) => {
   };
 
   return (
-    // <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg space-y-4">
-    //   <input
-    //     name="name"
-    //     placeholder="Full Name"
-    //     value={formData.name}
-    //     onChange={handleChange}
-    //     required
-    //   />
-    //   <input
-    //     name="email"
-    //     type="email"
-    //     placeholder="Email"
-    //     value={formData.email}
-    //     onChange={handleChange}
-    //     required
-    //   />
-    //   <input
-    //     name="password"
-    //     type="password"
-    //     placeholder="Password"
-    //     value={formData.password}
-    //     onChange={handleChange}
-    //     required
-    //   />
-    //   <input
-    //     name="neighborhood"
-    //     placeholder="Neighborhood"
-    //     value={formData.neighborhood}
-    //     onChange={handleChange}
-    //     required
-    //   />
-    //   <PhoneInput
-    //     defaultCountry="ZM"
-    //     placeholder="Phone number"
-    //     value={formData.phone}
-    //     onChange={(value) =>
-    //       dispatch(setFormData({ phone: value }))
-    //     }
-    //     required
-    //   />
-    //   <button type="submit" className="w-full bg-blue-600 text-white py-3">
-    //     Sign Up
-    //   </button>
-    // </form>
-
     <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
@@ -92,9 +47,6 @@ export const SignupScreen = ({ coords }) => {
               id="name"
               name="name"
               value={formData.name}
-              // onChange={(e) =>
-              //   setFormData({ ...formData, name: e.target.value })
-              // }
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -114,9 +66,6 @@ export const SignupScreen = ({ coords }) => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              // onChange={(e) =>
-              //   setFormData({ ...formData, email: e.target.value })
-              // }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -135,9 +84,6 @@ export const SignupScreen = ({ coords }) => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              // onChange={(e) =>
-              //   setFormData({ ...formData, password: e.target.value })
-              // }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -156,12 +102,6 @@ export const SignupScreen = ({ coords }) => {
               name="neighborhood"
               value={formData.neighborhood}
               onChange={handleChange}
-              // onChange={(e) =>
-              //   setFormData({
-              //     ...formData,
-              //     neighborhood: e.target.value,
-              //   })
-              // }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="e.g., Downtown, West End"
               required
@@ -178,10 +118,6 @@ export const SignupScreen = ({ coords }) => {
               name="phone"
               value={formData.phone}
               onChange={(value) => dispatch(setFormData({ phone: value }))}
-              // onChange={handleChange}
-              // onChange={(value) =>
-              //   setFormData({ ...formData, phone: value })
-              // }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -194,16 +130,6 @@ export const SignupScreen = ({ coords }) => {
             Sign Up
           </button>
         </form>
-
-        {/* <p className="text-center mt-6 text-gray-600">
-            Already have an account?{' '}
-            <button
-              onClick={() => setView('signin')}
-              className="text-blue-600 hover:underline"
-            >
-              Sign in
-            </button>
-          </p> */}
       </div>
     </div>
   );
