@@ -31,7 +31,7 @@ const authSlice = createSlice({
       name: '',
       email: '',
       password: '',
-      phone: '71234',
+      phone: '',
       neighborhood: '',
       latitude: '',
       longitude: '',
