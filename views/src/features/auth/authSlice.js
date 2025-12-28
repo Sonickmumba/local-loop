@@ -42,6 +42,18 @@ const authSlice = createSlice({
     setFormData(state, action) {
       state.formData = { ...state.formData, ...action.payload };
     },
+    resetFormData(state) {
+      state.formData = {
+        name: '',
+        email: '',
+        password: '',
+        phone: '',
+        neighborhood: '',
+        latitude: '',
+        longitude: '',
+        interests: [],
+      }; 
+    },
     logout(state) {
       state.user = null;
     },
@@ -57,5 +69,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setFormData, logout } = authSlice.actions;
+export const { setFormData, resetFormData, logout } = authSlice.actions;
 export default authSlice.reducer;
