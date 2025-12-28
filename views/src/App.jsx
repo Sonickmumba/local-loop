@@ -44,8 +44,6 @@ function App() {
           <Route path="signin" element={<SigninScreen />} />
         </Route>
 
-        
-
         <Route path="/phone" element={<PhoneVerificationScreen />} />
       </Routes>
     </div>
