@@ -38,16 +38,149 @@
 
 
 
-import { useState } from 'react';
-import { Smartphone } from 'lucide-react';
+// import { useState } from 'react';
+// import { Smartphone } from 'lucide-react';
 
-export function PhoneVerificationScreen({ onNext }) {
-  const [step, setStep] = useState('phone'); // 'phone' | 'code'
+// export function PhoneVerificationScreen({ onNext }) {
+//   const [step, setStep] = useState('phone'); // 'phone' | 'code'
+//   const [phoneNumber, setPhoneNumber] = useState('');
+//   const [code, setCode] = useState(['', '', '', '', '', '']);
+
+//   const handlePhoneSubmit = (e) => {
+//     e.preventDefault();
+//     setStep('code');
+//   };
+
+//   const handleCodeChange = (index, value) => {
+//     if (value.length <= 1 && /^\d*$/.test(value)) {
+//       const newCode = [...code];
+//       newCode[index] = value;
+//       setCode(newCode);
+
+//       // Auto-focus next input
+//       if (value && index < 5) {
+//         const nextInput = document.getElementById(`code-${index + 1}`);
+//         if (nextInput) {
+//           nextInput.focus();
+//         }
+//       }
+//     }
+//   };
+
+//   const handleVerify = () => {
+//     onNext();
+//   };
+
+//   return (
+//     <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
+//       <div className="w-full max-w-md">
+//         <div className="text-center mb-8">
+//           <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+//             <Smartphone className="w-10 h-10 text-blue-600" />
+//           </div>
+//           <h1 className="mb-3">
+//             {step === 'phone' ? 'Verify Your Phone' : 'Enter Verification Code'}
+//           </h1>
+//           <p className="text-gray-600">
+//             {step === 'phone'
+//               ? "We'll send you a verification code"
+//               : `Code sent to ${phoneNumber}`}
+//           </p>
+//         </div>
+
+//         {step === 'phone' ? (
+//           <form onSubmit={handlePhoneSubmit} className="space-y-6">
+//             <div>
+//               <label
+//                 htmlFor="phone"
+//                 className="block text-sm mb-2 text-gray-700"
+//               >
+//                 Phone Number
+//               </label>
+//               <input
+//                 type="tel"
+//                 id="phone"
+//                 value={phoneNumber}
+//                 onChange={(e) => setPhoneNumber(e.target.value)}
+//                 placeholder="+1 (555) 000-0000"
+//                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+//                 required
+//               />
+//             </div>
+
+//             <button
+//               type="submit"
+//               className="w-full bg-blue-600 text-white py-4 rounded-full hover:bg-blue-700 transition-colors"
+//             >
+//               Send Code
+//             </button>
+//           </form>
+//         ) : (
+//           <div className="space-y-6">
+//             <div className="flex gap-2 justify-center">
+//               {code.map((digit, index) => (
+//                 <input
+//                   key={index}
+//                   id={`code-${index}`}
+//                   type="text"
+//                   inputMode="numeric"
+//                   maxLength={1}
+//                   value={digit}
+//                   onChange={(e) =>
+//                     handleCodeChange(index, e.target.value)
+//                   }
+//                   className="w-12 h-14 text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+//                 />
+//               ))}
+//             </div>
+
+//             <button
+//               onClick={handleVerify}
+//               disabled={code.some((d) => !d)}
+//               className={`w-full py-4 rounded-full transition-colors ${
+//                 code.every((d) => d)
+//                   ? 'bg-blue-600 text-white hover:bg-blue-700'
+//                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+//               }`}
+//             >
+//               Verify
+//             </button>
+
+//             <button
+//               onClick={() => setStep('phone')}
+//               className="w-full text-gray-600 hover:text-gray-800 text-sm"
+//             >
+//               Resend Code
+//             </button>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { Smartphone } from 'lucide-react';
+import { sendOtp, verifyOtp } from '../auth/authSlice';
+
+export function PhoneVerificationScreen() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { otpStatus } = useSelector((state) => state.auth);
+
+  const [step, setStep] = useState('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [code, setCode] = useState(['', '', '', '', '', '']);
 
-  const handlePhoneSubmit = (e) => {
+  const handlePhoneSubmit = async (e) => {
     e.preventDefault();
+
+    await dispatch(sendOtp(phoneNumber));
     setStep('code');
   };
 
@@ -57,18 +190,27 @@ export function PhoneVerificationScreen({ onNext }) {
       newCode[index] = value;
       setCode(newCode);
 
-      // Auto-focus next input
       if (value && index < 5) {
         const nextInput = document.getElementById(`code-${index + 1}`);
-        if (nextInput) {
-          nextInput.focus();
-        }
+        if (nextInput) nextInput.focus();
       }
     }
   };
 
-  const handleVerify = () => {
-    onNext();
+  const handleVerify = async () => {
+    const otp = code.join('');
+    const result = await dispatch(
+      verifyOtp({ phone: phoneNumber, code: otp })
+    );
+    // This must be removed later please
+    navigate('/home');
+    console.log(result);
+
+    /* Below code must be used later */
+
+    // if (verifyOtp.fulfilled.match(result)) {
+    //   navigate('/home');
+    // }
   };
 
   return (
@@ -79,7 +221,9 @@ export function PhoneVerificationScreen({ onNext }) {
             <Smartphone className="w-10 h-10 text-blue-600" />
           </div>
           <h1 className="mb-3">
-            {step === 'phone' ? 'Verify Your Phone' : 'Enter Verification Code'}
+            {step === 'phone'
+              ? 'Verify Your Phone'
+              : 'Enter Verification Code'}
           </h1>
           <p className="text-gray-600">
             {step === 'phone'
@@ -90,29 +234,21 @@ export function PhoneVerificationScreen({ onNext }) {
 
         {step === 'phone' ? (
           <form onSubmit={handlePhoneSubmit} className="space-y-6">
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm mb-2 text-gray-700"
-              >
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="+1 (555) 000-0000"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
+            <input
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="+260XXXXXXXXX"
+              required
+              className="w-full px-4 py-3 border rounded-lg"
+            />
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-4 rounded-full hover:bg-blue-700 transition-colors"
+              disabled={otpStatus === 'sending'}
+              className="w-full bg-blue-600 text-white py-4 rounded-full"
             >
-              Send Code
+              {otpStatus === 'sending' ? 'Sending...' : 'Send Code'}
             </button>
           </form>
         ) : (
@@ -122,14 +258,12 @@ export function PhoneVerificationScreen({ onNext }) {
                 <input
                   key={index}
                   id={`code-${index}`}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
                   value={digit}
                   onChange={(e) =>
                     handleCodeChange(index, e.target.value)
                   }
-                  className="w-12 h-14 text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  maxLength={1}
+                  className="w-12 h-14 text-center border-2 rounded-lg"
                 />
               ))}
             </div>
@@ -137,18 +271,14 @@ export function PhoneVerificationScreen({ onNext }) {
             <button
               onClick={handleVerify}
               disabled={code.some((d) => !d)}
-              className={`w-full py-4 rounded-full transition-colors ${
-                code.every((d) => d)
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+              className="w-full py-4 rounded-full bg-blue-600 text-white"
             >
               Verify
             </button>
 
             <button
               onClick={() => setStep('phone')}
-              className="w-full text-gray-600 hover:text-gray-800 text-sm"
+              className="w-full text-sm text-gray-600"
             >
               Resend Code
             </button>
@@ -158,3 +288,4 @@ export function PhoneVerificationScreen({ onNext }) {
     </div>
   );
 }
+
