@@ -127,6 +127,15 @@ CREATE TABLE notifications (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE phone_otps (
+  id UUID PRIMARY KEY,
+  phone VARCHAR(20) NOT NULL,
+  otp VARCHAR(6) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  verified BOOLEAN DEFAULT FALSE
+);
+
+
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_phone ON users(phone);
 CREATE INDEX idx_listings_user ON listings(user_id);
