@@ -11,6 +11,7 @@ const listingsRoutes = require('./routes/listings');
 const notificationsRoutes = require('./routes/notifications');
 const reviewsRoutes = require('./routes/reviews');
 const tradesRoutes = require('./routes/trades');
+const otpRoutes = require('./routes/otp');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -56,6 +57,8 @@ app.use('/api/listings', listingsRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/reviews', reviewsRoutes);
 app.use('/api/trades', tradesRoutes);
+app.use('/api/auth/otp', otpRoutes);
+
 
 // 404 handler
 app.use((req, res) => {
