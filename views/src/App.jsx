@@ -1,6 +1,3 @@
-// import { useState } from 'react';
-// import reactLogo from './assets/react.svg';
-// import viteLogo from '/vite.svg';
 import {
   BrowserRouter as Router,
   Routes,
@@ -8,7 +5,6 @@ import {
   Navigate,
   // useNavigate,
 } from 'react-router-dom';
-// import { useSelector } from 'react-redux';
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,8 +20,6 @@ import { PhoneVerificationScreen } from './features/auth/PhoneVerificationScreen
 import { RequireAuth } from './features/auth/RequireAuth';
 import { HomeFeedScreen } from './features/home/HomeFeedScreen';
 
-// import { LoginSignupScreen } from './features/auth/LoginSignupScreen';
-
 import './App.css';
 
 function App() {
@@ -33,8 +27,7 @@ function App() {
   const initialized = useSelector(s => s.auth.initialized);
 
   // Location permission and coordinates from Redux store
-  const { permission, coords } = useSelector((s) => s.location);
-  console.log('Location permission:', permission, 'Coords:', coords);
+  const { coords } = useSelector((s) => s.location);
 
   useEffect(() => {
     dispatch(bootstrapSession());
@@ -50,7 +43,6 @@ function App() {
         <Route path="/welcome" element={<WelcomeScreen />} />
         <Route path="/location" element={<LocationPermissionScreen />} />
         <Route path="/interests" element={<InterestsSelectionScreen />} />
-        {/* <Route path="/login" element={<LoginSignupScreen />} /> */}
 
         <Route path="/auth" element={<LoginLayout />}>
           <Route index element={<Navigate to="signup" replace />} />
