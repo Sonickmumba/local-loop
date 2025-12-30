@@ -11,7 +11,7 @@ export const signupUser = createAsyncThunk(
       { withCredentials: true }
     );
     console.log('Signup response data:', res.data);
-    return res.data;
+    return res.data.user;
   }
 );
 
@@ -25,7 +25,32 @@ export const signinUser = createAsyncThunk(
       { withCredentials: true }
     );
     console.log('Signin response data:', res.data);
-    return res.data;
+    return res.data.data;
+  }
+);
+
+export const logoutUser = createAsyncThunk('auth/logoutUser', async () => {
+  await axios.post(
+    'http://localhost:3000/api/auth/logout',
+    {},
+    {
+      withCredentials: true,
+    }
+  );
+});
+
+export const bootstrapSession = createAsyncThunk(
+  'auth/bootstrapSession',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.get('http://localhost:3000/api/auth/me', {
+        withCredentials: true,
+      });
+      return res.data.data; // user object
+    } catch (error) {
+      console.error('Error bootstrapping session:', error);
+      return rejectWithValue(null);
+    }
   }
 );
 
@@ -61,7 +86,7 @@ export const verifyOtp = createAsyncThunk(
     if (authFlow !== 'signup') {
       return rejectWithValue('OTP verification not allowed');
     }
-    
+
     const res = await fetch('http://localhost:3000/api/auth/otp/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -92,6 +117,7 @@ const authSlice = createSlice({
     otpSending: false,
     otpVerifying: false,
     otpVerified: false,
+    initialized: false,
     formData: {
       name: '',
       email: '',
@@ -134,10 +160,22 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(signupUser.fulfilled, (state, action) => {
-        state.user = action.payload.user;
+        state.user = action.payload;
       })
       .addCase(signinUser.fulfilled, (state, action) => {
-        state.user = action.payload.data;
+        state.user = action.payload;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.authFlow = null;
+        state.otpVerified = false;
+      })
+      .addCase(bootstrapSession.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.initialized = true;
+      })
+      .addCase(bootstrapSession.rejected, (state) => {
+        state.initialized = true;
       })
       .addCase(sendOtp.pending, (state) => {
         state.otpSending = true;
@@ -155,5 +193,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { startSignup, startSignin,setFormData, resetFormData, logout } = authSlice.actions;
+export const { startSignup, startSignin, setFormData, resetFormData, logout } =
+  authSlice.actions;
 export default authSlice.reducer;
