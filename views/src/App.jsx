@@ -8,7 +8,11 @@ import {
   Navigate,
   // useNavigate,
 } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+// import { useSelector } from 'react-redux';
+
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { bootstrapSession } from './features/auth/authSlice';
 
 import { WelcomeScreen } from './features/welcome/WelcomeScreen';
 import { LocationPermissionScreen } from './features/location/LocationPermissionScreen';
@@ -25,9 +29,18 @@ import { HomeFeedScreen } from './features/home/HomeFeedScreen';
 import './App.css';
 
 function App() {
+  const dispatch = useDispatch();
+  const initialized = useSelector(s => s.auth.initialized);
+
   // Location permission and coordinates from Redux store
   const { permission, coords } = useSelector((s) => s.location);
   console.log('Location permission:', permission, 'Coords:', coords);
+
+  useEffect(() => {
+    dispatch(bootstrapSession());
+  }, [dispatch]);
+
+  if (!initialized) return <div>Loading...</div>;
 
   return (
     // <Router>
