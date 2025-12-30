@@ -5,37 +5,47 @@ const { validationResult } = require('express-validator');
 const pool = require('../config/db');
 const { generateId } = require('../utils/helpers');
 
-
 // register user
 exports.register = async (req, res, next) => {
-    try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty) {
-            return res.status(400).json( {success: false, errors: errors.array()});
-        }
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
 
-        const { name, email, password, phone, neighborhood, interests } = req.body;
+    const { name, email, password, phone, neighborhood, interests } = req.body;
 
-        // check if the user already exists
-        const existingUsers = await pool.query(`SELECT FROM users WHERE email = $1 OR phone = $2`, [email, phone]);
+    // check if the user already exists
+    const existingUsers = await pool.query(
+      `SELECT FROM users WHERE email = $1 OR phone = $2`,
+      [email, phone]
+    );
 
-        const users = existingUsers.rows;
+    const users = existingUsers.rows;
 
-        if (users.length > 0) {
-            return res.status(400).send("User with this email or phone already exists");
-        }
+    if (users.length > 0) {
+      return res
+        .status(400)
+        .send('User with this email or phone already exists');
+    }
 
-        // Hash password
-        const salt = await bcrypt.genSalt(10);
-        const passwordHash = await bcrypt.hash(password, salt);
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
 
-        // create user in the database
-        const userId = generateId();
-        await pool.query(`INSERT INTO users (id, name, email, password_hash, phone, neighborhood) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`, [userId, name, email, passwordHash, phone, neighborhood]);
+    // create user in the database
+    const userId = generateId();
+    await pool.query(
+      `INSERT INTO users (id, name, email, password_hash, phone, neighborhood) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [userId, name, email, passwordHash, phone, neighborhood]
+    );
 
-        // Add user interests if provided
+    // Add user interests if provided
     if (interests && interests.length > 0) {
-      const interestValues = interests.map(interestId => [userId, interestId]);
+      const interestValues = interests.map((interestId) => [
+        userId,
+        interestId,
+      ]);
       console.log(interestValues);
       await pool.query(
         `INSERT INTO user_interests (user_id, interest_id) VALUES ($1)`,
@@ -44,11 +54,9 @@ exports.register = async (req, res, next) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign(
-      { userId, email },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
-    );
+    const token = jwt.sign({ userId, email }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
+    });
 
     res.status(201).json({
       success: true,
@@ -57,15 +65,15 @@ exports.register = async (req, res, next) => {
         userId,
         name,
         email,
-        token
-      }
+        token,
+      },
     });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Error registering user.");
-    }
-}
-    
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error registering user.');
+  }
+};
+
 // Login user
 exports.login = async (req, res, next) => {
   try {
@@ -73,7 +81,7 @@ exports.login = async (req, res, next) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({
         success: false,
-        errors: errors.array()
+        errors: errors.array(),
       });
     }
 
@@ -88,7 +96,7 @@ exports.login = async (req, res, next) => {
     if (result.rowCount === 0) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Invalid email or password',
       });
     }
 
@@ -99,7 +107,7 @@ exports.login = async (req, res, next) => {
     if (!isValidPassword) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'Invalid email or password',
       });
     }
 
@@ -110,6 +118,14 @@ exports.login = async (req, res, next) => {
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
+    // Set token in HTTP-only cookie just addded here
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     res.json({
       success: true,
       message: 'Login successful',
@@ -117,14 +133,13 @@ exports.login = async (req, res, next) => {
         userId: user.id,
         name: user.name,
         email: user.email,
-        token
-      }
+        // removed token from response body
+      },
     });
   } catch (error) {
     next(error);
   }
 };
-
 
 // Get current user
 exports.getCurrentUser = async (req, res, next) => {
@@ -141,7 +156,7 @@ exports.getCurrentUser = async (req, res, next) => {
     if (userResult.rowCount === 0) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: 'User not found',
       });
     }
 
@@ -160,10 +175,20 @@ exports.getCurrentUser = async (req, res, next) => {
 
     res.json({
       success: true,
-      data: user
+      data: user,
     });
   } catch (error) {
     next(error);
   }
+};
+
+exports.logout = (req, res) => {
+  res.clearCookie('access_token', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  });
+
+  res.json({ success: true, message: 'Logged out' });
 };
 
