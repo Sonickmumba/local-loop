@@ -1,15 +1,16 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { signinUser, setFormData } from './authSlice';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { resetFormData } from './authSlice';
+// import { startSignin } from './authSlice';
 
 export const SigninScreen = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
   const formData = useSelector((s) => s.auth.formData);
 
-  const from = location.state?.from?.pathname || '/phone';
+  // const from = location.state?.from?.pathname || '/phone';
 
   const handleChange = (e) => {
     dispatch(setFormData({ [e.target.name]: e.target.value }));
@@ -17,6 +18,7 @@ export const SigninScreen = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const result = await dispatch(
       signinUser({
         email: formData.email,
@@ -26,7 +28,7 @@ export const SigninScreen = () => {
 
     if (signinUser.fulfilled.match(result)) {
       dispatch(resetFormData());
-      navigate(from, { replace: true });
+      navigate('/home/feed', { replace: true });
     }
   };
 
