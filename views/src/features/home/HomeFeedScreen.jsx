@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Home,
   Search,
@@ -7,8 +7,12 @@ import {
   MessageSquare,
   User,
   Bell,
-  SlidersHorizontal
+  SlidersHorizontal,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+
+import { fetchHomeFeed } from './homeFeedSlice';
 
 const mockListings = [
   {
@@ -23,7 +27,7 @@ const mockListings = [
     neighborhood: 'Downtown',
     distance: '0.5 mi',
     timeAgo: '2 hours ago',
-    responses: 5
+    responses: 5,
   },
   {
     id: '2',
@@ -37,7 +41,7 @@ const mockListings = [
     neighborhood: 'West End',
     distance: '1.2 mi',
     timeAgo: '4 hours ago',
-    responses: 3
+    responses: 3,
   },
   {
     id: '3',
@@ -51,19 +55,40 @@ const mockListings = [
     neighborhood: 'Downtown',
     distance: '0.3 mi',
     timeAgo: '1 day ago',
-    responses: 8
-  }
+    responses: 8,
+  },
 ];
 
-export function HomeFeedScreen({ navigate }) {
+export function HomeFeedScreen() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { listings, status, error } = useSelector((s) => s.homeFeed);
   const [activeTab, setActiveTab] = useState('all');
 
-  const filteredListings = mockListings.filter((listing) => {
+  const filteredListings = listings.filter((listing) => {
     if (activeTab === 'all') return true;
     if (activeTab === 'offers') return listing.type === 'offer';
     if (activeTab === 'needs') return listing.type === 'need';
     return true;
   });
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchHomeFeed());
+    }
+  }, [status, dispatch]);
+
+  {
+    status === 'loading' && (
+      <p className="text-center text-gray-500">Loading feed...</p>
+    );
+  }
+
+  {
+    status === 'failed' && <p className="text-center text-red-500">{error}</p>;
+  }
+
+  console.log('Listings in feed:', listings);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -159,7 +184,7 @@ export function HomeFeedScreen({ navigate }) {
             key={listing.id}
             onClick={() =>
               navigate('listing-details', {
-                selectedListingId: listing.id
+                selectedListingId: listing.id,
               })
             }
             className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
@@ -189,7 +214,7 @@ export function HomeFeedScreen({ navigate }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm">
-                  {listing.author
+                  {listing.author_name
                     .split(' ')
                     .map((n) => n[0])
                     .join('')}
@@ -244,9 +269,7 @@ export function HomeFeedScreen({ navigate }) {
           </button>
 
           <button
-            onClick={() =>
-              navigate('user-profile', { selectedUserId: 'me' })
-            }
+            onClick={() => navigate('user-profile', { selectedUserId: 'me' })}
             className="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600"
           >
             <User className="w-6 h-6" />
