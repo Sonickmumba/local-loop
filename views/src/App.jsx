@@ -18,6 +18,7 @@ import { SignupScreen } from './features/auth/SignupScreen';
 import { SigninScreen } from './features/auth/SigninScreen';
 import { PhoneVerificationScreen } from './features/auth/PhoneVerificationScreen';
 import { RequireAuth } from './features/auth/RequireAuth';
+import { HomeFeedScreen } from './features/home/HomeFeedScreen';
 
 // import { LoginSignupScreen } from './features/auth/LoginSignupScreen';
 
@@ -45,6 +46,15 @@ function App() {
         </Route>
 
         <Route path="/phone" element={<PhoneVerificationScreen />} />
+        {/* Protected routes */}
+        <Route
+          path="/home/feed"
+          element={
+            <RequireAuth>             
+              <HomeFeedScreen />
+            </RequireAuth>
+          }
+        />
       </Routes>
     </div>
     // </Router>
