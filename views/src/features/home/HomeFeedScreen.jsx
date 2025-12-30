@@ -14,51 +14,6 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { fetchHomeFeed } from './homeFeedSlice';
 
-const mockListings = [
-  {
-    id: '1',
-    type: 'offer',
-    category: 'Skills',
-    title: 'Free guitar lessons for beginners',
-    description:
-      "I've been playing for 10 years and would love to help beginners get started. Available weekends.",
-    author: 'Sarah Martinez',
-    authorId: 'user1',
-    neighborhood: 'Downtown',
-    distance: '0.5 mi',
-    timeAgo: '2 hours ago',
-    responses: 5,
-  },
-  {
-    id: '2',
-    type: 'need',
-    category: 'Services',
-    title: 'Need help moving furniture this Saturday',
-    description:
-      'Moving a couch and some boxes up to a 2nd floor apartment. Can offer pizza and drinks!',
-    author: 'Mike Roberts',
-    authorId: 'user2',
-    neighborhood: 'West End',
-    distance: '1.2 mi',
-    timeAgo: '4 hours ago',
-    responses: 3,
-  },
-  {
-    id: '3',
-    type: 'offer',
-    category: 'Goods',
-    title: 'Fresh vegetables from my garden',
-    description:
-      'Have extra tomatoes, zucchini, and herbs. Free to anyone who wants them!',
-    author: 'Lisa Kim',
-    authorId: 'user3',
-    neighborhood: 'Downtown',
-    distance: '0.3 mi',
-    timeAgo: '1 day ago',
-    responses: 8,
-  },
-];
-
 export function HomeFeedScreen() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
