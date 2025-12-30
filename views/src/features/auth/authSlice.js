@@ -24,7 +24,6 @@ export const signinUser = createAsyncThunk(
       credentials,
       { withCredentials: true }
     );
-    console.log('Signin response data:', res.data);
     return res.data.data;
   }
 );
