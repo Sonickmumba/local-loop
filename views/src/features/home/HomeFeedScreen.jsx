@@ -43,8 +43,6 @@ export function HomeFeedScreen() {
     status === 'failed' && <p className="text-center text-red-500">{error}</p>;
   }
 
-  console.log('Listings in feed:', listings);
-
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
