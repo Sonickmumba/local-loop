@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { resetFormData } from './authSlice';
+import { startSignup } from './authSlice';
 
 export const SignupScreen = ({ coords }) => {
   const dispatch = useDispatch();
@@ -16,6 +17,9 @@ export const SignupScreen = ({ coords }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    dispatch(startSignup());
+    
     const result = await dispatch(
       signupUser({
         ...formData,
