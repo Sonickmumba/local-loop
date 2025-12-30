@@ -38,7 +38,7 @@ export const SigninScreen = () => {
   dispatch(startSignin());
 
   try {
-    const result = await dispatch(
+    await dispatch(
       signinUser({
         email: formData.email,
         password: formData.password,
