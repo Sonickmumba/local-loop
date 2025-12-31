@@ -72,6 +72,7 @@ npm start
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - Login user
 - `GET /api/auth/me` - Get current user (protected)
+- `GET /api/auth/user/userId` = Get user by id (protected)
 
 ### Listings
 - `GET /api/listings` - Get all listings (with filters)

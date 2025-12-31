@@ -324,3 +324,44 @@ exports.getUserListings = async (req, res, next) => {
     next(error);
   }
 };
+
+
+exports.getSimilarListings = async (req, res) => {
+  const { listingId } = req.params;
+
+  // 1. Get the reference listing
+  const reference = await db.query(
+    `SELECT category, type, neighborhood, user_id
+     FROM listings
+     WHERE id = $1`,
+    [listingId]
+  );
+
+  if (!reference.rows.length) {
+    return res.status(404).json({ success: false });
+  }
+
+  const { category, type, neighborhood, user_id } = reference.rows[0];
+
+  // 2. Fetch similar listings
+  const result = await db.query(
+    `
+    SELECT id, title, category, neighborhood
+    FROM listings
+    WHERE category = $1
+      AND type = $2
+      AND id <> $3
+      AND user_id <> $4
+    ORDER BY
+      (neighborhood = $5) DESC,
+      created_at DESC
+    LIMIT 5
+    `,
+    [category, type, listingId, user_id, neighborhood]
+  );
+
+  res.json({
+    success: true,
+    data: result.rows,
+  });
+};

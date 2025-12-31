@@ -141,6 +141,49 @@ exports.login = async (req, res, next) => {
   }
 };
 
+// Get user by ID
+exports.getUserById = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+
+    // Fetch user
+    const userResult = await pool.query(
+      `SELECT id, name, email, phone, neighborhood, location_lat, location_lng,
+              profile_image_url, rating, total_ratings, completed_trades, created_at
+       FROM users
+       WHERE id = $1`,
+      [userId]
+    );
+
+    if (userResult.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    // Fetch user interests
+    const interestsResult = await pool.query(
+      `SELECT i.id, i.name, i.emoji
+       FROM interests i
+       JOIN user_interests ui ON i.id = ui.interest_id
+       WHERE ui.user_id = $1`,
+      [userId]
+    );
+
+    user.interests = interestsResult.rows;
+
+    res.json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Get current user
 exports.getCurrentUser = async (req, res, next) => {
   try {

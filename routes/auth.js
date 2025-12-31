@@ -18,6 +18,8 @@ router.post('/login', [
   ],
   authController.login)
 
+  router.get('/user/:userId', authMiddleware, authController.getUserById);
+
 // get currrent user
 router.get('/me', authMiddleware, authController.getCurrentUser);
 

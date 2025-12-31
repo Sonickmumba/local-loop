@@ -135,11 +135,7 @@ export function HomeFeedScreen() {
         {filteredListings.map((listing) => (
           <div
             key={listing.id}
-            onClick={() =>
-              navigate('listing-details', {
-                selectedListingId: listing.id,
-              })
-            }
+            onClick={() => navigate(`/listing-details/${listing.id}`)}
             className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
           >
             <div className="flex items-start justify-between mb-3">
