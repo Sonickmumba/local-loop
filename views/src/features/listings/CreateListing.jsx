@@ -1,5 +1,4 @@
 import { useState } from 'react';
-// import { Screen } from '../App';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,9 +24,7 @@ export const CreateListing = () => {
     const result = await dispatch(createListing(formData));
 
     if (createListing.fulfilled.match(result)) {
-      alert('Listing created successfully!');
       dispatch(fetchHomeFeed());
-
       navigate('/home/feed');
     }
   };
@@ -158,7 +155,6 @@ export const CreateListing = () => {
             className="w-full bg-blue-600 text-white py-4 rounded-full hover:bg-blue-700 transition-colors"
           >
             {creating ? 'Creating...' : 'Create Listing'}
-            Create Listing
           </button>
         </form>
       </div>
