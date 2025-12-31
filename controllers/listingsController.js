@@ -153,12 +153,13 @@ exports.createListing = async (req, res, next) => {
       location_lng,
       image_url,
     } = req.body;
-    userId = req.user.userId;
+
+    const userId = req.user.userId;
 
     const listingId = generateId();
 
     await pool.query(
-      `INSERT INTO listings (id, user_id, type, category, title, description, location_lat, location_lng, image_url) VALUES ($1,$2, $3, $4, $5, $6, $7)`,
+      `INSERT INTO listings (id, user_id, type, category, title, description, location_lat, location_lng, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         listingId,
         userId,
