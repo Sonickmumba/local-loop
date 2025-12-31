@@ -1,34 +1,58 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { signinUser, setFormData } from './authSlice';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { resetFormData } from './authSlice';
+import { startSignin } from './authSlice';
 
 export const SigninScreen = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
   const formData = useSelector((s) => s.auth.formData);
 
-  const from = location.state?.from?.pathname || '/phone';
+  // const from = location.state?.from?.pathname || '/phone';
 
   const handleChange = (e) => {
     dispatch(setFormData({ [e.target.name]: e.target.value }));
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   const result = await dispatch(
+  //     signinUser({
+  //       email: formData.email,
+  //       password: formData.password,
+  //     })
+  //   );
+
+  //   if (signinUser.fulfilled.match(result)) {
+  //     dispatch(resetFormData());
+  //     navigate('/home/feed', { replace: true });
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const result = await dispatch(
+  e.preventDefault();
+
+  dispatch(startSignin());
+
+  try {
+    await dispatch(
       signinUser({
         email: formData.email,
         password: formData.password,
       })
-    );
+    ).unwrap(); // <-- unwrap automatically throws if rejected
 
-    if (signinUser.fulfilled.match(result)) {
-      dispatch(resetFormData());
-      navigate(from, { replace: true });
-    }
-  };
+    // If login successful
+    dispatch(resetFormData());
+    navigate('/home/feed', { replace: true });
+  } catch (err) {
+    console.error('Signin failed:', err);
+  }
+};
+
 
   return (
     <form

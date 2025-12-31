@@ -36,8 +36,6 @@
 //   );
 // };
 
-
-
 // import { useState } from 'react';
 // import { Smartphone } from 'lucide-react';
 
@@ -159,10 +157,7 @@
 //   );
 // }
 
-
-
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Smartphone } from 'lucide-react';
@@ -172,6 +167,7 @@ export function PhoneVerificationScreen() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { otpStatus } = useSelector((state) => state.auth);
+  const { authFlow } = useSelector((state) => state.auth);
 
   const [step, setStep] = useState('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -199,12 +195,14 @@ export function PhoneVerificationScreen() {
 
   const handleVerify = async () => {
     const otp = code.join('');
-    const result = await dispatch(
-      verifyOtp({ phone: phoneNumber, code: otp })
-    );
+    const result = await dispatch(verifyOtp({ phone: phoneNumber, code: otp }));
+
+    if (verifyOtp.fulfilled.match(result)) {
+      navigate('/home/feed', { replace: true });
+    }
     // This must be removed later please
-    navigate('/home');
-    console.log(result);
+    // navigate('/home/feed');
+    // console.log(result);
 
     /* Below code must be used later */
 
@@ -212,6 +210,12 @@ export function PhoneVerificationScreen() {
     //   navigate('/home');
     // }
   };
+
+  useEffect(() => {
+    if (authFlow !== 'signup') {
+      navigate('/home/feed', { replace: true });
+    }
+  }, [authFlow, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
@@ -221,9 +225,7 @@ export function PhoneVerificationScreen() {
             <Smartphone className="w-10 h-10 text-blue-600" />
           </div>
           <h1 className="mb-3">
-            {step === 'phone'
-              ? 'Verify Your Phone'
-              : 'Enter Verification Code'}
+            {step === 'phone' ? 'Verify Your Phone' : 'Enter Verification Code'}
           </h1>
           <p className="text-gray-600">
             {step === 'phone'
@@ -259,9 +261,7 @@ export function PhoneVerificationScreen() {
                   key={index}
                   id={`code-${index}`}
                   value={digit}
-                  onChange={(e) =>
-                    handleCodeChange(index, e.target.value)
-                  }
+                  onChange={(e) => handleCodeChange(index, e.target.value)}
                   maxLength={1}
                   className="w-12 h-14 text-center border-2 rounded-lg"
                 />
@@ -288,4 +288,3 @@ export function PhoneVerificationScreen() {
     </div>
   );
 }
-

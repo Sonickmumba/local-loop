@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Home,
   Search,
@@ -7,63 +7,41 @@ import {
   MessageSquare,
   User,
   Bell,
-  SlidersHorizontal
+  SlidersHorizontal,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 
-const mockListings = [
-  {
-    id: '1',
-    type: 'offer',
-    category: 'Skills',
-    title: 'Free guitar lessons for beginners',
-    description:
-      "I've been playing for 10 years and would love to help beginners get started. Available weekends.",
-    author: 'Sarah Martinez',
-    authorId: 'user1',
-    neighborhood: 'Downtown',
-    distance: '0.5 mi',
-    timeAgo: '2 hours ago',
-    responses: 5
-  },
-  {
-    id: '2',
-    type: 'need',
-    category: 'Services',
-    title: 'Need help moving furniture this Saturday',
-    description:
-      'Moving a couch and some boxes up to a 2nd floor apartment. Can offer pizza and drinks!',
-    author: 'Mike Roberts',
-    authorId: 'user2',
-    neighborhood: 'West End',
-    distance: '1.2 mi',
-    timeAgo: '4 hours ago',
-    responses: 3
-  },
-  {
-    id: '3',
-    type: 'offer',
-    category: 'Goods',
-    title: 'Fresh vegetables from my garden',
-    description:
-      'Have extra tomatoes, zucchini, and herbs. Free to anyone who wants them!',
-    author: 'Lisa Kim',
-    authorId: 'user3',
-    neighborhood: 'Downtown',
-    distance: '0.3 mi',
-    timeAgo: '1 day ago',
-    responses: 8
-  }
-];
+import { fetchHomeFeed } from './homeFeedSlice';
 
-export function HomeFeedScreen({ navigate }) {
+export function HomeFeedScreen() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { listings, status, error } = useSelector((s) => s.homeFeed);
   const [activeTab, setActiveTab] = useState('all');
 
-  const filteredListings = mockListings.filter((listing) => {
+  const filteredListings = listings.filter((listing) => {
     if (activeTab === 'all') return true;
     if (activeTab === 'offers') return listing.type === 'offer';
     if (activeTab === 'needs') return listing.type === 'need';
     return true;
   });
+
+  useEffect(() => {
+    if (status === 'idle') {
+      dispatch(fetchHomeFeed());
+    }
+  }, [status, dispatch]);
+
+  {
+    status === 'loading' && (
+      <p className="text-center text-gray-500">Loading feed...</p>
+    );
+  }
+
+  {
+    status === 'failed' && <p className="text-center text-red-500">{error}</p>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -112,7 +90,7 @@ export function HomeFeedScreen({ navigate }) {
           </button>
 
           <button
-            onClick={() => navigate('create-listing')}
+            onClick={() => navigate('/create-listing')}
             className="flex flex-col items-center gap-2 p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
           >
             <PlusCircle className="w-6 h-6 text-green-600" />
@@ -159,7 +137,7 @@ export function HomeFeedScreen({ navigate }) {
             key={listing.id}
             onClick={() =>
               navigate('listing-details', {
-                selectedListingId: listing.id
+                selectedListingId: listing.id,
               })
             }
             className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
@@ -189,7 +167,7 @@ export function HomeFeedScreen({ navigate }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm">
-                  {listing.author
+                  {listing.author_name
                     .split(' ')
                     .map((n) => n[0])
                     .join('')}
@@ -215,7 +193,7 @@ export function HomeFeedScreen({ navigate }) {
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="flex items-center justify-around py-3 px-4">
-          <button className="flex flex-col items-center gap-1 text-blue-600">
+          <button onClick={() => navigate('/home/feed')} className="flex flex-col items-center gap-1 text-blue-600">
             <Home className="w-6 h-6" />
             <span className="text-xs">Home</span>
           </button>
@@ -229,7 +207,7 @@ export function HomeFeedScreen({ navigate }) {
           </button>
 
           <button
-            onClick={() => navigate('create-listing')}
+            onClick={() => navigate('/create-listing')}
             className="flex items-center justify-center w-14 h-14 bg-blue-600 rounded-full -mt-8 shadow-lg hover:bg-blue-700"
           >
             <PlusCircle className="w-7 h-7 text-white" />
@@ -244,9 +222,7 @@ export function HomeFeedScreen({ navigate }) {
           </button>
 
           <button
-            onClick={() =>
-              navigate('user-profile', { selectedUserId: 'me' })
-            }
+            onClick={() => navigate('user-profile', { selectedUserId: 'me' })}
             className="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600"
           >
             <User className="w-6 h-6" />

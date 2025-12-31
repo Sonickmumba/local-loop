@@ -1,6 +1,3 @@
-// import { useState } from 'react';
-// import reactLogo from './assets/react.svg';
-// import viteLogo from '/vite.svg';
 import {
   BrowserRouter as Router,
   Routes,
@@ -8,7 +5,10 @@ import {
   Navigate,
   // useNavigate,
 } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { bootstrapSession } from './features/auth/authSlice';
 
 import { WelcomeScreen } from './features/welcome/WelcomeScreen';
 import { LocationPermissionScreen } from './features/location/LocationPermissionScreen';
@@ -18,15 +18,23 @@ import { SignupScreen } from './features/auth/SignupScreen';
 import { SigninScreen } from './features/auth/SigninScreen';
 import { PhoneVerificationScreen } from './features/auth/PhoneVerificationScreen';
 import { RequireAuth } from './features/auth/RequireAuth';
-
-// import { LoginSignupScreen } from './features/auth/LoginSignupScreen';
+import { HomeFeedScreen } from './features/home/HomeFeedScreen';
+import { CreateListing } from './features/listings/CreateListing';
 
 import './App.css';
 
 function App() {
+  const dispatch = useDispatch();
+  const initialized = useSelector(s => s.auth.initialized);
+
   // Location permission and coordinates from Redux store
-  const { permission, coords } = useSelector((s) => s.location);
-  console.log('Location permission:', permission, 'Coords:', coords);
+  const { coords } = useSelector((s) => s.location);
+
+  useEffect(() => {
+    dispatch(bootstrapSession());
+  }, [dispatch]);
+
+  if (!initialized) return <div>Loading...</div>;
 
   return (
     // <Router>
@@ -36,7 +44,6 @@ function App() {
         <Route path="/welcome" element={<WelcomeScreen />} />
         <Route path="/location" element={<LocationPermissionScreen />} />
         <Route path="/interests" element={<InterestsSelectionScreen />} />
-        {/* <Route path="/login" element={<LoginSignupScreen />} /> */}
 
         <Route path="/auth" element={<LoginLayout />}>
           <Route index element={<Navigate to="signup" replace />} />
@@ -45,6 +52,16 @@ function App() {
         </Route>
 
         <Route path="/phone" element={<PhoneVerificationScreen />} />
+        {/* Protected routes */}
+        <Route
+          path="/home/feed"
+          element={
+            <RequireAuth>             
+              <HomeFeedScreen />
+            </RequireAuth>
+          }
+        />  
+        <Route path='/create-listing' element={<RequireAuth><CreateListing /></RequireAuth>} />
       </Routes>
     </div>
     // </Router>

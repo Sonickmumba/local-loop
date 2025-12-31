@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const errorHandler = require('./middleware/errorHandler');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+
 
 // imports routes here
 const authRoutes = require('./routes/auth');
@@ -17,9 +19,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // middleware here
+app.use(cookieParser());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    // origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: 'http://localhost:5173',
     credentials: true,
   })
 );
