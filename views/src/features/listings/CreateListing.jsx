@@ -29,8 +29,6 @@ export const CreateListing = () => {
     }
   };
 
-  console.log('Form Data:', formData);
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
