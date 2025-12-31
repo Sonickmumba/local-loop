@@ -207,7 +207,7 @@ export function HomeFeedScreen() {
           </button>
 
           <button
-            onClick={() => navigate('create-listing')}
+            onClick={() => navigate('/create-listing')}
             className="flex items-center justify-center w-14 h-14 bg-blue-600 rounded-full -mt-8 shadow-lg hover:bg-blue-700"
           >
             <PlusCircle className="w-7 h-7 text-white" />
