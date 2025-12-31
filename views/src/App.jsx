@@ -20,6 +20,8 @@ import { PhoneVerificationScreen } from './features/auth/PhoneVerificationScreen
 import { RequireAuth } from './features/auth/RequireAuth';
 import { HomeFeedScreen } from './features/home/HomeFeedScreen';
 import { CreateListing } from './features/listings/CreateListing';
+import { ListingDetails } from './features/listings/ListingDetails';
+import { UserProfile } from './features/user/UserProfile';
 
 import './App.css';
 
@@ -62,6 +64,8 @@ function App() {
           }
         />  
         <Route path='/create-listing' element={<RequireAuth><CreateListing /></RequireAuth>} />
+        <Route path='/listing-details/:listingId' element={<ListingDetails />} />
+        <Route path="/user-profile/:userId" element={< UserProfile />} />
       </Routes>
     </div>
     // </Router>
