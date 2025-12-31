@@ -193,7 +193,7 @@ export function HomeFeedScreen() {
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="flex items-center justify-around py-3 px-4">
-          <button className="flex flex-col items-center gap-1 text-blue-600">
+          <button onClick={() => navigate('/home/feed')} className="flex flex-col items-center gap-1 text-blue-600">
             <Home className="w-6 h-6" />
             <span className="text-xs">Home</span>
           </button>
