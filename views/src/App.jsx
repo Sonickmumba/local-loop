@@ -20,6 +20,7 @@ import { PhoneVerificationScreen } from './features/auth/PhoneVerificationScreen
 import { RequireAuth } from './features/auth/RequireAuth';
 import { HomeFeedScreen } from './features/home/HomeFeedScreen';
 import { CreateListing } from './features/listings/CreateListing';
+import { HomeSearchScreen } from './features/home/HomeSearchScreen';
 
 import './App.css';
 
@@ -62,6 +63,7 @@ function App() {
           }
         />  
         <Route path='/create-listing' element={<RequireAuth><CreateListing /></RequireAuth>} />
+        <Route path="/home/feed/search" element={<RequireAuth><HomeSearchScreen /></RequireAuth>} />
       </Routes>
     </div>
     // </Router>
