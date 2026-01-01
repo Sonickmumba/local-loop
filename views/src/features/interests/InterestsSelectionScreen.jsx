@@ -24,9 +24,7 @@ export const InterestsSelectionScreen = () => {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
-  };
-
-  console.log('Selected interests:', selected); 
+  }; 
 
   return (
     <div className="min-h-screen flex flex-col p-6 bg-gray-50">
