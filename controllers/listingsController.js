@@ -325,7 +325,6 @@ exports.getUserListings = async (req, res, next) => {
   }
 };
 
-
 exports.getSimilarListings = async (req, res, next) => {
   try {
     const { listingId } = req.params;
@@ -352,8 +351,7 @@ exports.getSimilarListings = async (req, res, next) => {
       });
     }
 
-    const { category, type, neighborhood, user_id } =
-      referenceResult.rows[0];
+    const { category, type, neighborhood, user_id } = referenceResult.rows[0];
 
     // 2. Fetch similar listings
     const similarResult = await pool.query(
@@ -386,4 +384,3 @@ exports.getSimilarListings = async (req, res, next) => {
     next(error);
   }
 };
-
