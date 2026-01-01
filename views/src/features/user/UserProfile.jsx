@@ -193,7 +193,7 @@ export const UserProfile = () => {
                 </div>
                 <div className="mb-2">{listing.title}</div>
                 <div className="text-sm text-gray-600">
-                  {listing.responses} responses
+                  {listing.responses ?? 0} responses
                 </div>
               </div>
             ))}
