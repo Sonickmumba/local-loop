@@ -23,6 +23,7 @@ import { CreateListing } from './features/listings/CreateListing';
 import { ListingDetails } from './features/listings/ListingDetails';
 import { UserProfile } from './features/user/UserProfile';
 import { HomeSearchScreen } from './features/home/HomeSearchScreen';
+import { UserSettings } from './features/user/userSettings.jsx';
 
 import './App.css';
 
@@ -68,6 +69,8 @@ function App() {
         <Route path='/listing-details/:listingId' element={<ListingDetails />} />
         <Route path="/user-profile/:userId" element={< UserProfile />} />
         <Route path="/home/feed/search" element={<RequireAuth><HomeSearchScreen /></RequireAuth>} />
+        {/* user setting */}
+        <Route path="user-profile/me/settings" element={<RequireAuth><UserSettings /></RequireAuth>} />
       </Routes>
     </div>
     // </Router>
