@@ -144,7 +144,12 @@ exports.login = async (req, res, next) => {
 // Get user by ID
 exports.getUserById = async (req, res, next) => {
   try {
-    const userId = req.params.userId;
+    let userId = req.params.userId;
+
+    // Handle /user/me
+    if (userId === 'me') {
+      userId = req.user.userId;
+    }
 
     // Fetch user
     const userResult = await pool.query(
