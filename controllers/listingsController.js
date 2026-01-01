@@ -302,7 +302,12 @@ exports.deleteListing = async (req, res, next) => {
 // Get user's listings
 exports.getUserListings = async (req, res, next) => {
   try {
-    const { userId } = req.params;
+    let userId = req.params.userId;
+
+    // Resolve "me"
+    if (userId === 'me') {
+      userId = req.user.userId;
+    }
 
     const userListingsResult = await pool.query(
       `SELECT l.*, u.name as author_name FROM listings l JOIN users u ON l.user_id = u.id WHERE l.user_id = $1 ORDER BY l.created_at DESC`,
