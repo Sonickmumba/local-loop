@@ -11,7 +11,7 @@ router.get('/', listingsController.getAllListings);
 router.get('/:id', listingsController.getListingsById);
 
 // `GET /api/listings/user/:userId` - Get user's listings
-router.get('/user/:userId', listingsController.getUserListings);
+router.get('/user/:userId', authMiddleware, listingsController.getUserListings);
 
 // GET /api/listings/:listingId/similar - Get similar listings
 router.get('/:listingId/similar', listingsController.getSimilarListings);
