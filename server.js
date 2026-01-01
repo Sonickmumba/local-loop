@@ -78,8 +78,7 @@ console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
 app.listen(PORT, () => {
   console.log('=================================');
-  console.log(`🚀 LocalLoop API Server`);
-  console.log(`🚀 Server is running at http://localhost:${PORT}.`);
+  console.log(`🚀 LocalLoop API Server is running at http://localhost:${PORT}.`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log('=================================');
 });
