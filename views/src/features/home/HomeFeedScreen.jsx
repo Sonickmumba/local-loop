@@ -189,7 +189,10 @@ export function HomeFeedScreen() {
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="flex items-center justify-around py-3 px-4">
-          <button onClick={() => navigate('/home/feed')} className="flex flex-col items-center gap-1 text-blue-600">
+          <button
+            onClick={() => navigate('/home/feed')}
+            className="flex flex-col items-center gap-1 text-blue-600"
+          >
             <Home className="w-6 h-6" />
             <span className="text-xs">Home</span>
           </button>
@@ -218,7 +221,8 @@ export function HomeFeedScreen() {
           </button>
 
           <button
-            onClick={() => navigate('user-profile', { selectedUserId: 'me' })}
+            onClick={() => navigate(`/user-profile/${'me'}`)}
+            // onClick={() => navigate('user-profile', { selectedUserId: 'me' })}
             className="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600"
           >
             <User className="w-6 h-6" />
