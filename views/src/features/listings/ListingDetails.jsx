@@ -102,9 +102,6 @@ export const ListingDetails = () => {
           <div className="mb-3 text-gray-600">Posted by</div>
           <button
             onClick={() => navigate(`/user-profile/${listing.user_id}`)}
-            // onClick={() =>
-            //   navigate('user-profile', { selectedUserId: listing.authorId })
-            // }
             className="flex items-center gap-3 w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
