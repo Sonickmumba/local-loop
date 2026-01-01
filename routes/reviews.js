@@ -10,7 +10,7 @@ const router = express.Router();
 router.post('/reviews', authMiddleware, reviewsController.createReview);
 
 // - `GET /api/reviews/user/:userId` - Get user's reviews
-router.get('/user/:userId', reviewsController.getUserReviews);
+router.get('/user/:userId', authMiddleware,reviewsController.getUserReviews);
 
 
 module.exports = router;
