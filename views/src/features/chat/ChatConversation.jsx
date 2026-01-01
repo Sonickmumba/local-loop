@@ -2,18 +2,6 @@ import { useState } from 'react';
 // import { Screen } from '../App';
 import { ArrowLeft, Send, MoreVertical } from 'lucide-react';
 
-// interface ChatConversationScreenProps {
-//   navigate: (screen: Screen, state?: any) => void;
-//   chatId?: string;
-// }
-
-// interface Message {
-//   id: string;
-//   sender: 'me' | 'them';
-//   text: string;
-//   time: string;
-// }
-
 export function ChatConversation({ navigate, chatId }) {
   const [messageText, setMessageText] = useState('');
   console.log('ChatConversationScreen chatId:', chatId);
