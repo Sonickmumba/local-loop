@@ -73,12 +73,10 @@ exports.getOrCreateConversation = async (req, res, next) => {
     const userId = req.user.userId;
 
     if (userId === participantId) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: 'Cannot create conversation with yourself!',
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot create conversation with yourself!',
+      });
     }
 
     // check if conversation already exist
@@ -117,13 +115,15 @@ exports.getOrCreateConversation = async (req, res, next) => {
 // Get messages in conversation
 exports.getMessages = async (req, res, next) => {
   try {
-    const { conversationId } = req.params;
-    const userId = req.user.id;
+    const { chatId } = req.params;
+    const userId = req.user.userId;
+
+    console.log('REQ.USER:', req.user);
 
     // check if user is part of the conversation
     const conversationResult = await pool.query(
-      `SELECT * FROM conversations WHERE id = $1 AND (participant1_id = $2 OR participant2_id = $3`,
-      [conversationId, userId, userId]
+      `SELECT * FROM conversations WHERE id = $1 AND (participant1_id = $2 OR participant2_id = $3)`,
+      [chatId, userId, userId]
     );
     const conversation = conversationResult.rows;
 
@@ -135,21 +135,23 @@ exports.getMessages = async (req, res, next) => {
     }
 
     // retrieve the message
-    const message = await pool.query(
-      `SELECT m.*, u.name as sender_name, FROM messages m JOIN users u ON m.sender_id = u.id WHERE m.conversation_id = $1 ORDER BY m.created_at ASC`,
-      [conversationId]
+    const messagesResult = await pool.query(
+      `SELECT m.*, u.name as sender_name FROM messages m JOIN users u ON m.sender_id = u.id WHERE m.conversation_id = $1 ORDER BY m.created_at ASC`,
+      [chatId]
     );
+
+    const messages = messagesResult.rows;
 
     // Mark messages as read
     await pool.query(
-      `UPDATE messages SET is_read = true WHERE conversation_id = $1 AND sender_id = $2`,
-      [conversationId, userId]
+      `UPDATE messages SET is_read = true WHERE conversation_id = $1 AND sender_id <> $2`,
+      [chatId, userId]
     );
 
     res.json({
       success: true,
-      count: messages.length,
-      data: messages,
+      count: messagesResult.rows.length,
+      data: messagesResult.rows,
     });
   } catch (error) {
     next(error);
@@ -160,26 +162,25 @@ exports.getMessages = async (req, res, next) => {
 exports.sendMessage = async (req, res, next) => {
   try {
     const { conversationId, content } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId;
+    const io = req.app.get('io');
 
     // check if user is part of the conversation
     const conversationResult = await pool.query(
-      `SELECT * FROM conversations WHERE id = $1 AND (participant1_id = $2 OR participant2_id = $3`,
+      `SELECT * FROM conversations WHERE id = $1 AND (participant1_id = $2 OR participant2_id = $3)`,
       [conversationId, userId, userId]
     );
-    const conversations = conversationResult.rows;
-
-    if (conversations.length === 0) {
+    if (conversationResult.rows.length === 0) {
       return res.status(403).json({
         success: false,
-        message: 'Cannot send message ',
+        message: 'Cannot send message',
       });
     }
 
     // create message
     const messageId = generateId();
     await pool.query(
-      `INSERT INTO messages (id, conversation_id, sender_id, content, ) VALUES ($1, $2, $3, $4)`,
+      `INSERT INTO messages (id, conversation_id, sender_id, content ) VALUES ($1, $2, $3, $4)`,
       [messageId, conversationId, userId, content]
     );
 
@@ -196,7 +197,7 @@ exports.sendMessage = async (req, res, next) => {
     );
 
     // Create notification for other participant
-    const conversation = conversations[0];
+    const conversation = conversationResult.rows[0];
     const recipientId =
       conversation.participant1_id === userId
         ? conversation.participant2_id
@@ -224,12 +225,77 @@ exports.sendMessage = async (req, res, next) => {
       [messageId]
     );
 
+    const newMessage = newMessageResult.rows[0];
+
+    // Broadcast via Socket.IO to the room
+    io.to(conversationId).emit('new-message', newMessage);
+
+
     res.status(201).json({
       success: true,
       message: 'Message sent successfully',
-      data: newMessageResult.rows[0],
+      data: newMessage,
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+exports.getConversationById = async (req, res, next) => {
+  const { conversationId } = req.params;
+  const userId = req.user.userId;
+
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT
+        c.id,
+        l.id AS listing_id,
+        l.title AS listing_title,
+
+        CASE
+          WHEN c.participant1_id = $1 THEN u2.id
+          ELSE u1.id
+        END AS partner_id,
+
+        CASE
+          WHEN c.participant1_id = $1 THEN u2.name
+          ELSE u1.name
+        END AS partner_name
+
+      FROM conversations c
+      JOIN listings l ON l.id = c.listing_id
+      JOIN users u1 ON u1.id = c.participant1_id
+      JOIN users u2 ON u2.id = c.participant2_id
+      WHERE c.id = $2
+        AND ($1 = c.participant1_id OR $1 = c.participant2_id)
+      `,
+      [userId, conversationId]
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conversation not found or access denied',
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        id: rows[0].id,
+        partner: {
+          id: rows[0].partner_id,
+          name: rows[0].partner_name,
+        },
+        listing: {
+          id: rows[0].listing_id,
+          title: rows[0].listing_title,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('getConversationById error:', error);
     next(error);
   }
 };

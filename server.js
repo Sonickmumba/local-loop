@@ -1,5 +1,9 @@
 require('dotenv').config();
 const express = require('express');
+
+const http = require('http');
+const { Server } = require('socket.io');
+
 const cors = require('cors');
 const errorHandler = require('./middleware/errorHandler');
 const bodyParser = require('body-parser');
@@ -16,7 +20,19 @@ const tradesRoutes = require('./routes/trades');
 const otpRoutes = require('./routes/otp');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const server = http.createServer(app);
+/* ======================
+   SOCKET.IO SETUP
+====================== */
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:5173',
+    credentials: true,
+  },
+});
+
+// Make io available to routes if needed
+app.set('io', io);
 
 // middleware here
 app.use(cookieParser());
@@ -64,6 +80,28 @@ app.use('/api/trades', tradesRoutes);
 app.use('/api/auth/otp', otpRoutes);
 
 
+/* ======================
+   SOCKET EVENTS
+====================== */
+io.on('connection', (socket) => {
+  console.log('🟢 Socket connected:', socket.id);
+
+  socket.on('join-conversation', (conversationId) => {
+    socket.join(conversationId);
+    console.log(`Socket ${socket.id} joined ${conversationId}`);
+  });
+
+  socket.on('send-message', ({ conversationId, message }) => {
+    io.to(conversationId).emit('new-message', message);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('🔴 Socket disconnected:', socket.id);
+  });
+});
+
+
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
@@ -74,9 +112,13 @@ app.use((req, res) => {
 
 // Error handler (must be last)
 app.use(errorHandler);
-console.log('JWT_SECRET:', process.env.JWT_SECRET);
 
-app.listen(PORT, () => {
+/* ======================
+   START SERVER
+====================== */
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, () => {
   console.log('=================================');
   console.log(`🚀 LocalLoop API Server is running at http://localhost:${PORT}.`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);

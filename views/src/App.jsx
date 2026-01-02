@@ -25,6 +25,7 @@ import { UserProfile } from './features/user/UserProfile';
 import { HomeSearchScreen } from './features/home/HomeSearchScreen';
 import { UserSettings } from './features/user/userSettings.jsx';
 import { ChatConversation } from './features/chat/ChatConversation.jsx';
+import { ChatList } from './features/chat/ChatList.jsx';
 
 import './App.css';
 
@@ -96,9 +97,14 @@ function App() {
             </RequireAuth>
           }
         />
+        <Route path="/chat-conversation" element={<ChatConversation />} />
         <Route
-          path="/chat-conversation/:listingId"
-          element={<ChatConversation />}
+          path="/chat-list"
+          element={
+            <RequireAuth>
+              <ChatList />
+            </RequireAuth>
+          }
         />
       </Routes>
     </div>

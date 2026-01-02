@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, MapPin, Clock, MessageSquare, User } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
 
 export const ListingDetails = () => {
   const navigate = useNavigate();
@@ -35,6 +36,8 @@ export const ListingDetails = () => {
     fetchListing();
     fetchSimilarListings();
   }, [listingId]);
+
+  console.log(listing);
 
   if (!listing) {
     return <div>Loading...</div>;
@@ -154,7 +157,43 @@ export const ListingDetails = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
         <div className="max-w-2xl mx-auto">
           <button
-            onClick={() => navigate(`/chat-conversation/${listing.id}`)}
+            // onClick={() =>
+            //   navigate('/chat-conversation', {
+            //     state: { chatId: listing.id },
+            //   })
+            // }
+            onClick={() => {
+              if (!listing.id || !listing.user_id) {
+                console.error('Listing ID or owner ID is missing!');
+                return;
+              }
+
+              axios
+                .post(
+                  'http://localhost:3000/api/conversations',
+                  {
+                    listingId: listing.id, // <-- listing ID
+                    participantId: listing.user_id, // <-- listing owner ID
+                  },
+                  { withCredentials: true } // important if using cookie-based auth
+                )
+                .then((res) => {
+                  const conversationId = res.data.data.id;
+                  navigate('/chat-conversation', {
+                    state: {
+                      chatId: conversationId,
+                      partnerName: res.data.data.partner_name,
+                      listingTitle: res.data.data.listing_title,
+                    },
+                  });
+                })
+                .catch((err) =>
+                  console.error(
+                    'Error creating conversation:',
+                    err.response?.data || err
+                  )
+                );
+            }}
             className="w-full bg-blue-600 text-white py-4 rounded-full hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
           >
             <MessageSquare className="w-5 h-5" />

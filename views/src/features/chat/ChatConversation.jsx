@@ -1,61 +1,174 @@
-import { useState } from 'react';
-// import { Screen } from '../App';
+import { useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, MoreVertical } from 'lucide-react';
+import { io } from 'socket.io-client';
+import axios from 'axios';
 
-export function ChatConversation({ navigate, chatId }) {
+const SOCKET_SERVER_URL = 'http://localhost:3000';
+const API_BASE_URL = 'http://localhost:3000/api';
+
+export function ChatConversation() {
+  const navigate = useNavigate();
+  const authUserId = useSelector((state) => state.auth.user?.id);
+  const location = useLocation();
+  
+  const { chatId } = location.state || {};
   const [messageText, setMessageText] = useState('');
-  console.log('ChatConversationScreen chatId:', chatId);
-  const [messages, setMessages] = useState([
-    {
-      id: '1',
-      sender: 'them',
-      text: 'Hi! I saw your listing about guitar lessons. Are you still offering them?',
-      time: '10:30 AM'
-    },
-    {
-      id: '2',
-      sender: 'me',
-      text: 'Yes! I\'d be happy to help you get started. Do you have any experience?',
-      time: '10:32 AM'
-    },
-    {
-      id: '3',
-      sender: 'them',
-      text: 'I\'m a complete beginner. Never played before.',
-      time: '10:35 AM'
-    },
-    {
-      id: '4',
-      sender: 'me',
-      text: 'Perfect! That\'s exactly what I love to teach. When would you like to start?',
-      time: '10:37 AM'
-    },
-    {
-      id: '5',
-      sender: 'them',
-      text: 'Sure! I can start this weekend if that works for you',
-      time: '10:40 AM'
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
+  const [contact, setContact] = useState(null);
+  const [conversation, setConversation] = useState(null);
 
-  const handleSend = () => {
+  const socketRef = useRef();
+  const messagesEndRef = useRef(null);
+  
+
+  // Scroll chat to bottom whenever messages change
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  useEffect(scrollToBottom, [messages]);
+
+  useEffect(() => {
+  console.log('Chat ID:', chatId);
+
+  if (!chatId) return;
+
+  // Fetch conversation details (partner + listing)
+axios
+  .get(`${API_BASE_URL}/conversations/${chatId}`, {
+    withCredentials: true,
+  })
+  .then((res) => {
+    if (res.data.success) {
+      setConversation(res.data.data);
+    }
+  })
+  .catch((err) =>
+    console.error('Failed to fetch conversation details', err)
+  );
+
+
+
+
+
+
+  axios
+    .get(`${API_BASE_URL}/conversations/${chatId}`, {
+      withCredentials: true,
+    })
+    .then(res => {
+      console.log('Conversation API response:', res.data);
+      setContact(res.data.data);
+    })
+    .catch(err => {
+      console.error(
+        'Failed to load conversation header:',
+        err.response?.data || err.message
+      );
+    });
+}, [chatId]);
+
+
+  // Fetch previous messages + setup socket
+  useEffect(() => {
+    if (!chatId || !authUserId) return;
+
+    // Fetch messages
+    axios
+      .get(`${API_BASE_URL}/conversations/${chatId}/messages`, {
+        withCredentials: true,
+      })
+      .then((res) => {
+        if (res.data.success) {
+          const uniqueMessages = res.data.data.filter(
+            (v, i, a) => a.findIndex((x) => x.id === v.id) === i
+          );
+          setMessages(uniqueMessages);
+        }
+      })
+      .catch((err) => console.error('Failed to fetch messages', err));
+
+    // Connect to socket
+    socketRef.current = io(SOCKET_SERVER_URL, {
+      withCredentials: true,
+    });
+
+    socketRef.current.emit('join-conversation', chatId);
+
+    // Listen for new messages
+    socketRef.current.on('new-message', (message) => {
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === message.id)) return prev;
+        return [...prev, message];
+      });
+    });
+
+    return () => {
+      socketRef.current.disconnect();
+    };
+  }, [chatId, authUserId]);
+
+  // Send message
+  const handleSend = async () => {
     if (!messageText.trim()) return;
 
-    const newMessage= {
-      id: Date.now().toString(),
-      sender: 'me',
-      text: messageText,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const tempId = `temp-${Date.now()}-${Math.random()}`;
+    const tempMessage = {
+      id: tempId,
+      content: messageText,
+      sender_id: authUserId,
+      created_at: new Date().toISOString(),
+      optimistic: true,
     };
 
-    setMessages([...messages, newMessage]);
+    // Show immediately
+    setMessages((prev) => [...prev, tempMessage]);
     setMessageText('');
+
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/conversations/messages`,
+        { conversationId: chatId, content: tempMessage.content },
+        { withCredentials: true }
+      );
+
+      if (res.data.success && res.data.data) {
+        const confirmedMessage = res.data.data;
+
+        setMessages((prev) =>
+          prev
+            .map((m) => (m.id === tempId ? confirmedMessage : m))
+            .filter((v, i, a) => a.findIndex((x) => x.id === v.id) === i)
+        );
+      }
+    } catch (err) {
+      console.error('Failed to send message', err);
+    }
   };
 
-  const contact = {
-    name: 'Sarah Martinez',
-    listing: 'Guitar lessons'
-  };
+  if (!chatId) {
+    return (
+      <div className="p-4 text-red-600">No chat selected. Please go back.</div>
+    );
+  }
+
+  if (!authUserId) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-500">
+        Loading chat…
+      </div>
+    );
+  }
+  console.log(contact);
+
+  if (!conversation) {
+  return (
+    <div className="flex items-center justify-center min-h-screen text-gray-500">
+      Loading conversation…
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -64,18 +177,40 @@ export function ChatConversation({ navigate, chatId }) {
         <div className="px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate('chat-list')}
+              onClick={() => navigate(-1)}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
-              {contact.name.split(' ').map(n => n[0]).join('')}
+            {contact && (
+              <>
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
+                  {conversation?.partner?.name
+  ?.split(' ')
+  .map((n) => n[0])
+  .join('') || '?'}
+
+                </div>
+
+                <div>
+                  <div>{conversation?.partner?.name || 'Loading…'}</div>
+                  <div className="text-sm text-gray-600">
+                    Re: {conversation?.listing?.title || ''}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
+              {contact.name
+                .split(' ')
+                .map((n) => n[0])
+                .join('')}
             </div>
             <div>
               <div>{contact.name}</div>
               <div className="text-sm text-gray-600">Re: {contact.listing}</div>
-            </div>
+            </div> */}
           </div>
           <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <MoreVertical className="w-5 h-5" />
@@ -85,27 +220,36 @@ export function ChatConversation({ navigate, chatId }) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'}`}
-          >
+        {messages.map((message) => {
+          const isMe = message.sender_id === authUserId;
+          return (
             <div
-              className={`max-w-[75%] rounded-2xl px-4 py-3 ${
-                message.sender === 'me'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white border border-gray-200'
-              }`}
+              key={message.id}
+              className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
             >
-              <p>{message.text}</p>
-              <div className={`text-xs mt-1 ${
-                message.sender === 'me' ? 'text-blue-100' : 'text-gray-500'
-              }`}>
-                {message.time}
+              <div
+                className={`max-w-[75%] rounded-2xl px-4 py-3 ${
+                  isMe
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white border border-gray-200'
+                }`}
+              >
+                <p>{message.content}</p>
+                <div
+                  className={`text-xs mt-1 ${
+                    isMe ? 'text-blue-100' : 'text-gray-500'
+                  }`}
+                >
+                  {new Date(message.created_at).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Trade Action */}
