@@ -8,6 +8,8 @@ const cors = require('cors');
 const errorHandler = require('./middleware/errorHandler');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const securityHeaders = require('./middleware/securityHeaders');
+const { apiLimiter } = require('./middleware/rateLimiting');
 
 // imports routes here
 const authRoutes = require('./routes/auth');
@@ -34,11 +36,12 @@ const io = new Server(server, {
 app.set('io', io);
 
 // middleware here
+app.use(securityHeaders);
+app.use(apiLimiter);
 app.use(cookieParser());
 app.use(
   cors({
-    // origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-    origin: 'http://localhost:5173',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
     credentials: true,
   })
 );
