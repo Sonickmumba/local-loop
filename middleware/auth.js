@@ -2,8 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
   try {
-    // Get token from header
-    // const token = req.headers.authorization?.split(' ')[1]; // Bearer TOKEN
+    // Get token from header or cookie
     const token = req.cookies.access_token;
 
     if (!token) {
@@ -21,7 +20,8 @@ const authMiddleware = (req, res, next) => {
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,
-        message: 'Token expired.'
+        message: 'Access token expired.',
+        code: 'TOKEN_EXPIRED'
       });
     }
     return res.status(401).json({
