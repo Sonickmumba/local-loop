@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Home,
   Search,
@@ -9,16 +9,17 @@ import {
   Bell,
   SlidersHorizontal,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
-import { fetchHomeFeed } from './homeFeedSlice';
+import { useHomeFeed } from '../../hooks/useHomeFeed';
 import { ListingCard } from '../../components/ListingCard';
+import { FilterTabs } from '../../components/FilterTabs';
 
 export function HomeFeedScreen() {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { listings, status, error } = useSelector((s) => s.homeFeed);
+  const location = useLocation();
+  const { listings, status, error } = useHomeFeed();
   const user = useSelector((s) => s.auth.user);
   const [activeTab, setActiveTab] = useState('all');
 
@@ -29,20 +30,20 @@ export function HomeFeedScreen() {
     return true;
   });
 
-  useEffect(() => {
-    if (status === 'idle') {
-      dispatch(fetchHomeFeed());
-    }
-  }, [status, dispatch]);
-
-  {
-    status === 'loading' && (
-      <p className="text-center text-gray-500">Loading feed...</p>
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-center text-gray-500">Loading feed...</p>
+      </div>
     );
   }
 
-  {
-    status === 'failed' && <p className="text-center text-red-500">{error}</p>;
+  if (status === 'failed') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-center text-red-500">{error}</p>
+      </div>
+    );
   }
 
   return (
@@ -109,28 +110,7 @@ export function HomeFeedScreen() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex gap-2">
-          {['all', 'offers', 'needs'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-full transition-colors ${
-                activeTab === tab
-                  ? tab === 'offers'
-                    ? 'bg-green-600 text-white'
-                    : tab === 'needs'
-                    ? 'bg-orange-600 text-white'
-                    : 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-      </div>
+      <FilterTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Listings Feed */}
       <div className="px-4 py-4 space-y-4">
@@ -143,7 +123,11 @@ export function HomeFeedScreen() {
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="flex items-center justify-around py-3 px-4">
           <button
-            onClick={() => navigate('/home/feed')}
+            onClick={() => {
+              if (location.pathname !== '/home/feed') {
+                navigate('/home/feed');
+              }
+            }}
             className="flex flex-col items-center gap-1 text-blue-600"
           >
             <Home className="w-6 h-6" />
