@@ -50,6 +50,7 @@ export const HomeSearchScreen = () => {
 
     fetchListings();
   }, [debouncedQuery, typeFilter, categoryFilter]);
+  console.log(results);
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -139,9 +140,8 @@ export const HomeSearchScreen = () => {
         {results.map((result) => (
           <div
             key={result.id}
-            onClick={() =>
-              navigate('listing-details', { selectedListingId: result.id })
-            }
+
+            onClick={() => navigate(`/listing-details/${result.id}`)}
             className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
           >
             <div className="flex items-center gap-2 mb-2">
