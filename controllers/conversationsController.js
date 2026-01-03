@@ -97,6 +97,12 @@ exports.getOrCreateConversation = async (req, res, next) => {
       [conversionId, listingId, userId, participantId]
     );
 
+    // Increment responses_count for the listing
+    await pool.query(
+      `UPDATE listings SET responses_count = responses_count + 1 WHERE id = $1`,
+      [listingId]
+    );
+
     const newConversion = await pool.query(
       `SELECT * FROM conversations WHERE id = $1`,
       [conversionId]
