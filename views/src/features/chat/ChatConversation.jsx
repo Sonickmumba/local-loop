@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, MoreVertical } from 'lucide-react';
-import socket from '../util/socket';
-import axios from 'axios';
 import { useAuth } from '../../hooks/useAuth';
+import { useConversation } from '../../hooks/useConversation';
+import { useMessages } from '../../hooks/useMessages';
+import { ChatHeader } from '../../components/ChatHeader';
+import { MessageList } from '../../components/MessageList';
+import { MessageInput } from '../../components/MessageInput';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { ErrorMessage } from '../../components/ErrorMessage';
 
@@ -17,137 +18,12 @@ export function ChatConversation() {
 
   const searchParams = new URLSearchParams(location.search);
   const chatId = searchParams.get('chatId');
-  const [messageText, setMessageText] = useState('');
-  const [messages, setMessages] = useState([]);
-  const [contact, setContact] = useState(null);
-  const [conversation, setConversation] = useState(null);
-  const [conversationLoading, setConversationLoading] = useState(true);
-  const [conversationError, setConversationError] = useState(null);
 
-  // const socketRef = useRef();
-  const messagesEndRef = useRef(null);
+  const { conversation, contact, loading: conversationLoading, error: conversationError } = useConversation(chatId);
+  const { messages, sendMessage } = useMessages(chatId, authUserId);
 
-  // Scroll chat to bottom whenever messages change
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-  useEffect(() => {
-  if (messages.length > 0) {
-    scrollToBottom();
-  }
-}, [messages.length]);
-
-
-  useEffect(() => {
-    if (!chatId) return;
-
-    // setConversationError(null);
-
-    axios
-      .get(`${API_BASE_URL}/conversations/${chatId}`, {
-        withCredentials: true,
-        timeout: 5000,
-      })
-      .then((res) => {
-        if (res.data.success) {
-          setConversation(res.data.data);
-          setContact(res.data.data.partner);
-        } else {
-          setConversationError('Failed to load conversation');
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to fetch conversation details', err);
-        setConversationError('Failed to load conversation');
-      })
-      .finally(() => setConversationLoading(false));
-  }, [chatId]);
-
-  // Fetch previous messages + setup socket
-  useEffect(() => {
-    if (!chatId || !authUserId) return;
-
-    // Fetch messages
-    axios
-      .get(`${API_BASE_URL}/conversations/${chatId}/messages`, {
-        withCredentials: true,
-        timeout: 5000,
-      })
-      .then((res) => {
-        if (res.data.success) {
-          const uniqueMessages = res.data.data.filter(
-            (v, i, a) => a.findIndex((x) => x.id === v.id) === i
-          );
-          setMessages(uniqueMessages);
-        }
-      })
-      .catch((err) => console.error('Failed to fetch messages', err));
-
-    // 1. Connect socket (only once globally)
-    if (!socket.connected) {
-      socket.connect();
-    }
-
-    const handleNewMessage = (message) => {
-      console.log('Received new message:', message);
-      setMessages((prev) => {
-        if (prev.some((m) => m.id === message.id)) return prev;
-        return [...prev, message];
-      });
-    };
-
-    // Attach listener FIRST
-    socket.off('new_message'); // defensive cleanup
-    socket.on('new_message', handleNewMessage);
-
-    // 2. Join conversation room
-    socket.emit('join-conversation', chatId, (joined) => {
-      console.log('Joined conversation room:', chatId, 'success:', joined);
-      if (!joined) console.error('Failed to join room');
-    });
-
-    return () => {
-      socket.off('new_message', handleNewMessage);
-      // DO NOT disconnect here
-    };
-  }, [chatId, authUserId]);
-
-  // Send message
-  const handleSend = async () => {
-    if (!messageText.trim()) return;
-
-    const tempId = `temp-${Date.now()}-${Math.random()}`;
-    const tempMessage = {
-      id: tempId,
-      content: messageText,
-      sender_id: authUserId,
-      created_at: new Date().toISOString(),
-      optimistic: true,
-    };
-
-    // Show immediately
-    setMessages((prev) => [...prev, tempMessage]);
-    setMessageText('');
-
-    try {
-      const res = await axios.post(
-        `${API_BASE_URL}/conversations/messages`,
-        { conversationId: chatId, content: tempMessage.content },
-        { withCredentials: true, timeout: 5000 }
-      );
-
-      if (res.data.success && res.data.data) {
-        const confirmedMessage = res.data.data;
-
-        setMessages((prev) =>
-          prev
-            .map((m) => (m.id === tempId ? confirmedMessage : m))
-            .filter((v, i, a) => a.findIndex((x) => x.id === v.id) === i)
-        );
-      }
-    } catch (err) {
-      console.error('Failed to send message', err);
-    }
+  const handleSend = (content) => {
+    sendMessage(content);
   };
 
   if (!chatId) {
@@ -191,84 +67,9 @@ export function ChatConversation() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            {contact && (
-              <>
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
-                  {conversation?.partner?.name
-                    ?.split(' ')
-                    .map((n) => n[0])
-                    .join('') || '?'}
-                </div>
+      <ChatHeader onBack={() => navigate(-1)} contact={contact} conversation={conversation} />
 
-                <div>
-                  <div>{conversation?.partner?.name || 'Unknown User'}</div>
-                  <div className="text-sm text-gray-600">
-                    Re: {conversation?.listing?.title || 'Unknown Listing'}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
-              {contact.name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')}
-            </div>
-            <div>
-              <div>{contact.name}</div>
-              <div className="text-sm text-gray-600">Re: {contact.listing}</div>
-            </div> */}
-          </div>
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <MoreVertical className="w-5 h-5" />
-          </button>
-        </div>
-      </header>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
-        {messages.map((message) => {
-          const isMe = message.sender_id === authUserId;
-          return (
-            <div
-              key={message.id}
-              className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[75%] rounded-2xl px-4 py-3 ${
-                  isMe
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white border border-gray-200'
-                }`}
-              >
-                <p>{message.content}</p>
-                <div
-                  className={`text-xs mt-1 ${
-                    isMe ? 'text-blue-100' : 'text-gray-500'
-                  }`}
-                >
-                  {new Date(message.created_at).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-        <div ref={messagesEndRef} />
-      </div>
+      <MessageList messages={messages} authUserId={authUserId} />
 
       {/* Trade Action */}
       <div className="bg-blue-50 border-t border-blue-200 px-4 py-3">
@@ -280,25 +81,7 @@ export function ChatConversation() {
         </button>
       </div>
 
-      {/* Input */}
-      <div className="bg-white border-t border-gray-200 px-4 py-3">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={messageText}
-            onChange={(e) => setMessageText(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Type a message..."
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            onClick={handleSend}
-            className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
-          >
-            <Send className="w-5 h-5 text-white" />
-          </button>
-        </div>
-      </div>
+      <MessageInput onSend={handleSend} />
     </div>
   );
 }
