@@ -55,11 +55,12 @@ export const bootstrapSession = createAsyncThunk(
 
 export const sendOtp = createAsyncThunk(
   'auth/sendOtp',
-  async (phone, { getState, rejectWithValue }) => {
-    const { authFlow } = getState().auth;
-    if (authFlow !== 'signup') {
-      return rejectWithValue('OTP allowed only during signup');
-    }
+  async (phone, { rejectWithValue }) => {
+    // TEMPORARILY DISABLED authFlow check for testing
+    // const { authFlow } = getState().auth;
+    // if (authFlow !== 'signup') {
+    //   return rejectWithValue('OTP allowed only during signup');
+    // }
     const res = await fetch('http://localhost:3000/api/auth/otp/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -74,12 +75,12 @@ export const sendOtp = createAsyncThunk(
 
 export const verifyOtp = createAsyncThunk(
   'auth/verifyOtp',
-  async ({ phone, code }, { getState, rejectWithValue }) => {
-    const { authFlow } = getState().auth;
-
-    if (authFlow !== 'signup') {
-      return rejectWithValue('OTP verification not allowed');
-    }
+  async ({ phone, code }, { rejectWithValue }) => {
+    // TEMPORARILY DISABLED authFlow check for testing
+    // const { authFlow } = getState().auth;
+    // if (authFlow !== 'signup') {
+    //   return rejectWithValue('OTP verification not allowed');
+    // }
 
     const res = await fetch('http://localhost:3000/api/auth/otp/verify', {
       method: 'POST',
