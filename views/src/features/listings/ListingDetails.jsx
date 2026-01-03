@@ -42,7 +42,7 @@ export const ListingDetails = () => {
   if (!listing) {
     return <div>Loading...</div>;
   }
-
+  console.log(listing);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -95,7 +95,7 @@ export const ListingDetails = () => {
             </div>
             <div className="flex items-center gap-2 text-gray-600">
               <MessageSquare className="w-5 h-5" />
-              <span>{listing.responses} people responded</span>
+              <span>{listing.responses_count} people responded</span>
             </div>
           </div>
         </div>
