@@ -14,9 +14,15 @@ exports.getAllListings = async (req, res, next) => {
         u.neighborhood,
         u.rating AS author_rating,
         u.location_lat AS author_lat,
-        u.location_lng AS author_lng
+        u.location_lng AS author_lng,
+        COALESCE(conversation_counts.conversation_count, 0) as responses_count
       FROM listings l
       JOIN users u ON l.user_id = u.id
+      LEFT JOIN (
+        SELECT listing_id, COUNT(*) as conversation_count 
+        FROM conversations 
+        GROUP BY listing_id
+      ) conversation_counts ON l.id = conversation_counts.listing_id
       WHERE 1 = 1
     `;
 
@@ -104,8 +110,15 @@ exports.getListingsById = async (req, res, next) => {
     const listingsResult = await pool.query(
       `
             SELECT l.*, u.name AS authors_name, u.neighborhood, u.rating as author_rating,
-              u.completed_trades, u.location_lat, u.location_lng
-              FROM listings l JOIN users u ON l.user_id = u.id
+              u.completed_trades, u.location_lat, u.location_lng,
+              COALESCE(conversation_counts.conversation_count, 0) as responses_count
+              FROM listings l 
+              JOIN users u ON l.user_id = u.id
+              LEFT JOIN (
+                SELECT listing_id, COUNT(*) as conversation_count 
+                FROM conversations 
+                GROUP BY listing_id
+              ) conversation_counts ON l.id = conversation_counts.listing_id
               WHERE l.id = $1
             `,
       [id]
