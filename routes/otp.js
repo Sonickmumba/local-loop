@@ -4,8 +4,9 @@ const {
   sendPhoneOtp,
   verifyPhoneOtp,
 } = require('../controllers/otpController');
+const { otpLimiter } = require('../middleware/rateLimiting');
 
-router.post('/send', sendPhoneOtp);
-router.post('/verify', verifyPhoneOtp);
+router.post('/send', otpLimiter, sendPhoneOtp);
+router.post('/verify', otpLimiter, verifyPhoneOtp);
 
 module.exports = router;
