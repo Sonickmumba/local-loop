@@ -9,7 +9,6 @@ const errorHandler = require('./middleware/errorHandler');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
-
 // imports routes here
 const authRoutes = require('./routes/auth');
 const conversationsRoutes = require('./routes/conversations');
@@ -43,7 +42,6 @@ app.use(
     credentials: true,
   })
 );
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -79,16 +77,16 @@ app.use('/api/reviews', reviewsRoutes);
 app.use('/api/trades', tradesRoutes);
 app.use('/api/auth/otp', otpRoutes);
 
-
 /* ======================
    SOCKET EVENTS
 ====================== */
 io.on('connection', (socket) => {
   console.log('🟢 Socket connected:', socket.id);
 
-  socket.on('join-conversation', (conversationId) => {
+  socket.on('join-conversation', (conversationId, ack) => {
     socket.join(conversationId);
-    console.log(`Socket ${socket.id} joined ${conversationId}`);
+    console.log(`Socket ${socket.id} joined conversation ${conversationId}`);
+    if (ack) ack(true);
   });
 
   socket.on('send-message', ({ conversationId, message }) => {
@@ -99,8 +97,6 @@ io.on('connection', (socket) => {
     console.log('🔴 Socket disconnected:', socket.id);
   });
 });
-
-
 
 // 404 handler
 app.use((req, res) => {
@@ -120,7 +116,9 @@ const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
   console.log('=================================');
-  console.log(`🚀 LocalLoop API Server is running at http://localhost:${PORT}.`);
+  console.log(
+    `🚀 LocalLoop API Server is running at http://localhost:${PORT}.`
+  );
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log('=================================');
 });

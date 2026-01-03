@@ -1,74 +1,67 @@
 import { useState, useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, MoreVertical } from 'lucide-react';
-import { io } from 'socket.io-client';
+import socket from '../util/socket';
 import axios from 'axios';
+import { useAuth } from '../../hooks/useAuth';
+import { LoadingSpinner } from '../../components/LoadingSpinner';
+import { ErrorMessage } from '../../components/ErrorMessage';
 
 const SOCKET_SERVER_URL = 'http://localhost:3000';
 const API_BASE_URL = 'http://localhost:3000/api';
 
 export function ChatConversation() {
   const navigate = useNavigate();
-  const authUserId = useSelector((state) => state.auth.user?.id);
+  const { userId: authUserId } = useAuth();
   const location = useLocation();
-  
-  const { chatId } = location.state || {};
+
+  const searchParams = new URLSearchParams(location.search);
+  const chatId = searchParams.get('chatId');
   const [messageText, setMessageText] = useState('');
   const [messages, setMessages] = useState([]);
   const [contact, setContact] = useState(null);
   const [conversation, setConversation] = useState(null);
+  const [conversationLoading, setConversationLoading] = useState(true);
+  const [conversationError, setConversationError] = useState(null);
 
-  const socketRef = useRef();
+  // const socketRef = useRef();
   const messagesEndRef = useRef(null);
-  
 
   // Scroll chat to bottom whenever messages change
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-  useEffect(scrollToBottom, [messages]);
+  useEffect(() => {
+  if (messages.length > 0) {
+    scrollToBottom();
+  }
+}, [messages.length]);
+
 
   useEffect(() => {
-  console.log('Chat ID:', chatId);
+    if (!chatId) return;
 
-  if (!chatId) return;
+    // setConversationError(null);
 
-  // Fetch conversation details (partner + listing)
-axios
-  .get(`${API_BASE_URL}/conversations/${chatId}`, {
-    withCredentials: true,
-  })
-  .then((res) => {
-    if (res.data.success) {
-      setConversation(res.data.data);
-    }
-  })
-  .catch((err) =>
-    console.error('Failed to fetch conversation details', err)
-  );
-
-
-
-
-
-
-  axios
-    .get(`${API_BASE_URL}/conversations/${chatId}`, {
-      withCredentials: true,
-    })
-    .then(res => {
-      console.log('Conversation API response:', res.data);
-      setContact(res.data.data);
-    })
-    .catch(err => {
-      console.error(
-        'Failed to load conversation header:',
-        err.response?.data || err.message
-      );
-    });
-}, [chatId]);
-
+    axios
+      .get(`${API_BASE_URL}/conversations/${chatId}`, {
+        withCredentials: true,
+        timeout: 5000,
+      })
+      .then((res) => {
+        if (res.data.success) {
+          setConversation(res.data.data);
+          setContact(res.data.data.partner);
+        } else {
+          setConversationError('Failed to load conversation');
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to fetch conversation details', err);
+        setConversationError('Failed to load conversation');
+      })
+      .finally(() => setConversationLoading(false));
+  }, [chatId]);
 
   // Fetch previous messages + setup socket
   useEffect(() => {
@@ -78,6 +71,7 @@ axios
     axios
       .get(`${API_BASE_URL}/conversations/${chatId}/messages`, {
         withCredentials: true,
+        timeout: 5000,
       })
       .then((res) => {
         if (res.data.success) {
@@ -89,23 +83,32 @@ axios
       })
       .catch((err) => console.error('Failed to fetch messages', err));
 
-    // Connect to socket
-    socketRef.current = io(SOCKET_SERVER_URL, {
-      withCredentials: true,
-    });
+    // 1. Connect socket (only once globally)
+    if (!socket.connected) {
+      socket.connect();
+    }
 
-    socketRef.current.emit('join-conversation', chatId);
-
-    // Listen for new messages
-    socketRef.current.on('new-message', (message) => {
+    const handleNewMessage = (message) => {
+      console.log('Received new message:', message);
       setMessages((prev) => {
         if (prev.some((m) => m.id === message.id)) return prev;
         return [...prev, message];
       });
+    };
+
+    // Attach listener FIRST
+    socket.off('new_message'); // defensive cleanup
+    socket.on('new_message', handleNewMessage);
+
+    // 2. Join conversation room
+    socket.emit('join-conversation', chatId, (joined) => {
+      console.log('Joined conversation room:', chatId, 'success:', joined);
+      if (!joined) console.error('Failed to join room');
     });
 
     return () => {
-      socketRef.current.disconnect();
+      socket.off('new_message', handleNewMessage);
+      // DO NOT disconnect here
     };
   }, [chatId, authUserId]);
 
@@ -130,7 +133,7 @@ axios
       const res = await axios.post(
         `${API_BASE_URL}/conversations/messages`,
         { conversationId: chatId, content: tempMessage.content },
-        { withCredentials: true }
+        { withCredentials: true, timeout: 5000 }
       );
 
       if (res.data.success && res.data.data) {
@@ -160,15 +163,31 @@ axios
       </div>
     );
   }
-  console.log(contact);
+
+  if (conversationLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner size="lg" />
+        <span className="ml-2">Loading conversation…</span>
+      </div>
+    );
+  }
+
+  if (conversationError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <ErrorMessage message={conversationError} />
+      </div>
+    );
+  }
 
   if (!conversation) {
-  return (
-    <div className="flex items-center justify-center min-h-screen text-gray-500">
-      Loading conversation…
-    </div>
-  );
-}
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-500">
+        No conversation found
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -186,16 +205,15 @@ axios
               <>
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
                   {conversation?.partner?.name
-  ?.split(' ')
-  .map((n) => n[0])
-  .join('') || '?'}
-
+                    ?.split(' ')
+                    .map((n) => n[0])
+                    .join('') || '?'}
                 </div>
 
                 <div>
-                  <div>{conversation?.partner?.name || 'Loading…'}</div>
+                  <div>{conversation?.partner?.name || 'Unknown User'}</div>
                   <div className="text-sm text-gray-600">
-                    Re: {conversation?.listing?.title || ''}
+                    Re: {conversation?.listing?.title || 'Unknown Listing'}
                   </div>
                 </div>
               </>

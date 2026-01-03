@@ -2,11 +2,13 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, MapPin, Clock, MessageSquare, User } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import axios from 'axios';
 
 export const ListingDetails = () => {
   const navigate = useNavigate();
   const { listingId } = useParams();
+  const user = useSelector((state) => state.auth.user);
   const [listing, setListing] = useState(null);
 
   const [similarListings, setSimilarListings] = useState([]);
@@ -36,8 +38,6 @@ export const ListingDetails = () => {
     fetchListing();
     fetchSimilarListings();
   }, [listingId]);
-
-  console.log(listing);
 
   if (!listing) {
     return <div>Loading...</div>;
@@ -163,6 +163,10 @@ export const ListingDetails = () => {
             //   })
             // }
             onClick={() => {
+              if (!user) {
+                navigate('/auth/signin');
+                return;
+              }
               if (!listing.id || !listing.user_id) {
                 console.error('Listing ID or owner ID is missing!');
                 return;
@@ -179,13 +183,7 @@ export const ListingDetails = () => {
                 )
                 .then((res) => {
                   const conversationId = res.data.data.id;
-                  navigate('/chat-conversation', {
-                    state: {
-                      chatId: conversationId,
-                      partnerName: res.data.data.partner_name,
-                      listingTitle: res.data.data.listing_title,
-                    },
-                  });
+                  navigate(`/chat-conversation?chatId=${conversationId}`);
                 })
                 .catch((err) =>
                   console.error(

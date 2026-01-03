@@ -53,11 +53,6 @@ export const bootstrapSession = createAsyncThunk(
   }
 );
 
-// otp
-// export const sendOtp = createAsyncThunk('auth/sendOtp', async (phone) => {
-//   await axios.post('/otp/send', { phone });
-// });
-
 export const sendOtp = createAsyncThunk(
   'auth/sendOtp',
   async (phone, { getState, rejectWithValue }) => {

@@ -68,9 +68,7 @@ export const ChatList = () => {
           <button
             key={chat.id}
             onClick={() =>
-              navigate('/chat-conversation', {
-                state: { chatId: chat.id },
-              })
+              navigate(`/chat-conversation?chatId=${chat.id}`)
             }
             className="w-full bg-white hover:bg-gray-50 transition-colors px-4 py-4 flex items-start gap-3"
           >

@@ -228,7 +228,7 @@ exports.sendMessage = async (req, res, next) => {
     const newMessage = newMessageResult.rows[0];
 
     // Broadcast via Socket.IO to the room
-    io.to(conversationId).emit('new-message', newMessage);
+    io.to(conversationId).emit('new_message', newMessage);
 
 
     res.status(201).json({

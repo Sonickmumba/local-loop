@@ -77,7 +77,11 @@ function App() {
         />
         <Route
           path="/listing-details/:listingId"
-          element={<ListingDetails />}
+          element={
+            <RequireAuth>
+              <ListingDetails />
+            </RequireAuth>
+          }
         />
         <Route path="/user-profile/:userId" element={<UserProfile />} />
         <Route
@@ -97,7 +101,11 @@ function App() {
             </RequireAuth>
           }
         />
-        <Route path="/chat-conversation" element={<ChatConversation />} />
+        <Route path="/chat-conversation" element={
+          <RequireAuth>
+            <ChatConversation />
+          </RequireAuth>
+        } />
         <Route
           path="/chat-list"
           element={

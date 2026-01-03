@@ -62,10 +62,9 @@ exports.register = async (req, res, next) => {
       success: true,
       message: 'User registered successfully',
       data: {
-        userId,
+        id: userId,
         name,
         email,
-        token,
       },
     });
   } catch (error) {
@@ -130,7 +129,7 @@ exports.login = async (req, res, next) => {
       success: true,
       message: 'Login successful',
       data: {
-        userId: user.id,
+        id: user.id,
         name: user.name,
         email: user.email,
         // removed token from response body
