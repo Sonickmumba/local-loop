@@ -17,7 +17,6 @@ export const useMessages = (chatId, authUserId) => {
         timeout: 5000,
       })
       .then((res) => {
-        console.log('Messages API response:', res.data);
         if (res.data.success) {
           const uniqueMessages = res.data.data.filter(
             (v, i, a) => a.findIndex((x) => x.id === v.id) === i
@@ -33,7 +32,6 @@ export const useMessages = (chatId, authUserId) => {
     }
 
     const handleNewMessage = (message) => {
-      console.log('Received new message:', message);
       setMessages((prev) => {
         if (prev.some((m) => m.id === message.id)) return prev;
         return [...prev, message];

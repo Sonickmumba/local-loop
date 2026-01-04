@@ -32,9 +32,7 @@ export const ChatList = () => {
       </div>
     );
   }
-
-  console.log(conversations[0]);
-
+  
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
