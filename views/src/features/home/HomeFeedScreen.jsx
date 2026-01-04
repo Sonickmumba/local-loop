@@ -15,6 +15,7 @@ import { useSelector } from 'react-redux';
 import { useHomeFeed } from '../../hooks/useHomeFeed';
 import { ListingCard } from '../../components/ListingCard';
 import { FilterTabs } from '../../components/FilterTabs';
+// import { useAuth } from '../../hooks/useAuth';
 
 export function HomeFeedScreen() {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ export function HomeFeedScreen() {
   const { listings, status, error } = useHomeFeed();
   const user = useSelector((s) => s.auth.user);
   const [activeTab, setActiveTab] = useState('all');
+
+  // const { isAuthenticated } = useAuth();
 
   const filteredListings = listings.filter((listing) => {
     if (activeTab === 'all') return true;
@@ -164,7 +167,8 @@ export function HomeFeedScreen() {
           </button>
 
           <button
-            onClick={() => navigate(`/user-profile/${'me'}`)}
+            onClick={() =>
+              navigate(`/user-profile/${'me'}`)}
             // onClick={() => navigate('user-profile', { selectedUserId: 'me' })}
             className="flex flex-col items-center gap-1 text-gray-400 hover:text-gray-600"
           >
