@@ -51,7 +51,7 @@ export const ListingCard = ({ listing }) => {
 
         <div className="flex items-center gap-1 text-gray-500">
           <MessageSquare className="w-4 h-4" />
-          <span className="text-sm">{listing.responses}</span>
+          <span className="text-sm">{listing.responses_count}</span>
         </div>
       </div>
     </div>

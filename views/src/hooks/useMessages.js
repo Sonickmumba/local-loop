@@ -43,7 +43,6 @@ export const useMessages = (chatId, authUserId) => {
 
     // Join room
     socket.emit('join-conversation', chatId, (joined) => {
-      console.log('Joined conversation room:', chatId, 'success:', joined);
       if (!joined) console.error('Failed to join room');
     });
 
