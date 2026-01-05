@@ -149,7 +149,7 @@ export function TradeManagementScreen({ tradeId }) {
             </div>
             <div className="flex-1 text-left">
               <div className="mb-1">{trade.requester_name}</div>
-              <div className="text-sm text-gray-600">⭐ 4.8 • 23 trades</div>
+              <div className="text-sm text-gray-600">⭐ {trade.requester_rating} • 23 trades</div>
             </div>
           </button>
         </div>
