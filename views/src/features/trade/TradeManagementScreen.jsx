@@ -20,7 +20,8 @@ export function TradeManagementScreen() {
 
   const handleAccept = () => {
     alert('Trade accepted! You can now chat to finalize details.');
-    navigate('chat-conversation', { selectedChatId: trade.id });
+    // navigate('/chat-conversation', {state:{ selectedChatId: trade.id }});
+    navigate(-1);
   };
 
   const handleComplete = () => {
@@ -28,14 +29,16 @@ export function TradeManagementScreen() {
   };
 
   useEffect(() => {
-    const fetchTradeDetails = async (id) => {
-      const res = await fetch(`http://localhost:3000/api/trades/${id}`, {
+    if (!tradeDataId) return;
+
+    const fetchTradeDetails = async () => {
+      const res = await fetch(`http://localhost:3000/api/trades/${tradeDataId}`, {
         credentials: 'include',
       });
       const data = await res.json();
       setTrade(data.trade);
     };
-    fetchTradeDetails(tradeDataId);
+    fetchTradeDetails();
   }, [tradeDataId]);
 
   if (!trade) {
