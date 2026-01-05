@@ -3,6 +3,7 @@ import locationReducer from '../features/location/locationPermissionSlice';
 import authReducer from '../features/auth/authSlice';
 import homeFeedReducer from '../features/home/homeFeedSlice';
 import listingsReducer from '../features/listings/listingsSlice';
+import notificationsReducer from '../features/notification/notificationsSlice';
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     auth: authReducer,
     homeFeed: homeFeedReducer,
     listings: listingsReducer,
+    notifications: notificationsReducer,
   },
 });
 

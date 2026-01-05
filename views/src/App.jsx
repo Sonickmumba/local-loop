@@ -102,11 +102,14 @@ function App() {
             </RequireAuth>
           }
         />
-        <Route path="/chat-conversation" element={
-          <RequireAuth>
-            <ChatConversation />
-          </RequireAuth>
-        } />
+        <Route
+          path="/chat-conversation"
+          element={
+            <RequireAuth>
+              <ChatConversation />
+            </RequireAuth>
+          }
+        />
         <Route
           path="/chat-list"
           element={
@@ -115,7 +118,14 @@ function App() {
             </RequireAuth>
           }
         />
-        <Route path="/notifications" element={<NotificationsScreen />} />
+        <Route
+          path="/notifications"
+          element={
+            <RequireAuth>
+              <NotificationsScreen />
+            </RequireAuth>
+          }
+        />
       </Routes>
     </div>
     // </Router>

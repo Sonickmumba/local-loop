@@ -104,7 +104,7 @@ export function HomeFeedScreen() {
           </button>
 
           <button
-            onClick={() => navigate('chat-list')}
+            onClick={() => navigate('/chat-list')}
             className="flex flex-col items-center gap-2 p-3 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
           >
             <MessageSquare className="w-6 h-6 text-purple-600" />

@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const pool = require('../config/db');
 const { generateId, calculateDistance, timeAgo } = require('../utils/helpers');
+const { createNotification } = require('./notificationsController');
 
 // Get all listings (with filters)
 exports.getAllListings = async (req, res, next) => {
@@ -187,14 +188,61 @@ exports.createListing = async (req, res, next) => {
     );
 
     const newListingResult = await pool.query(
-      `SELECT * FROM listings WHERE id = $1`,
+      `SELECT 
+        l.*,
+        u.name AS author_name,
+        u.neighborhood,
+        u.rating AS author_rating,
+        u.location_lat AS author_lat,
+        u.location_lng AS author_lng,
+        COALESCE(conversation_counts.conversation_count, 0) as responses_count
+      FROM listings l
+      JOIN users u ON l.user_id = u.id
+      LEFT JOIN (
+        SELECT listing_id, COUNT(*) as conversation_count 
+        FROM conversations 
+        GROUP BY listing_id
+      ) conversation_counts ON l.id = conversation_counts.listing_id
+      WHERE l.id = $1`,
       [listingId]
     );
+
+    const listing = newListingResult.rows[0];
+
+    // Add timeAgo
+    listing.timeAgo = timeAgo(listing.created_at);
+
+    // Set default distance for newly created listings (assume nearby)
+    listing.distance = 0;
+
+    // Create notifications for users in the same neighborhood
+    try {
+      const nearbyUsersResult = await pool.query(
+        `SELECT id, name FROM users 
+         WHERE neighborhood = $1 AND id != $2 
+         LIMIT 10`, // Limit to prevent too many notifications
+        [listing.neighborhood, userId]
+      );
+
+      const nearbyUsers = nearbyUsersResult.rows;
+      for (const nearbyUser of nearbyUsers) {
+        await createNotification(
+          nearbyUser.id,
+          'listing',
+          'New listing in your area',
+          `${listing.title} - ${listing.description.substring(0, 50)}...`,
+          listingId
+        );
+      }
+    } catch (notificationError) {
+      console.error('Error creating notifications:', notificationError);
+      // Don't fail the listing creation if notifications fail
+    }
 
     res.status(201).json({
       success: true,
       message: 'Listing created successfully',
-      data: newListingResult.rows[0],
+      data: listing,
     });
   } catch (error) {
     next(error);
