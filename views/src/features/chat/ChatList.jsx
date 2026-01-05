@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 const API_BASE_URL = 'http://localhost:3000/api';
 
 export const ChatList = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,9 +21,14 @@ export const ChatList = () => {
           setConversations(res.data.data);
         }
       })
-      .catch((err) => console.error('Failed to fetch conversations', err))
+      .catch((err) => {
+        console.error('Failed to fetch conversations', err);
+        if (err.response?.status === 401) {
+          navigate('/auth/signin');
+        }
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [navigate]);
 
   if (loading) {
     return (
@@ -32,7 +37,7 @@ export const ChatList = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -65,9 +70,7 @@ export const ChatList = () => {
         {conversations.map((chat) => (
           <button
             key={chat.id}
-            onClick={() =>
-              navigate(`/chat-conversation?chatId=${chat.id}`)
-            }
+            onClick={() => navigate(`/chat-conversation?chatId=${chat.id}`)}
             className="w-full bg-white hover:bg-gray-50 transition-colors px-4 py-4 flex items-start gap-3"
           >
             {/* Avatar */}
