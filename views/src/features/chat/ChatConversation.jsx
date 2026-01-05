@@ -74,7 +74,7 @@ export function ChatConversation() {
       {/* Trade Action */}
       <div className="bg-blue-50 border-t border-blue-200 px-4 py-3">
         <button
-          onClick={() => navigate('trade-negotiation')}
+          onClick={() => navigate('/trade-negotiation')}
           className="w-full bg-white border border-blue-300 text-blue-600 py-3 rounded-lg hover:bg-blue-50 transition-colors"
         >
           🤝 Propose a Trade
