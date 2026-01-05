@@ -12,6 +12,7 @@ export const UserProfile = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [userListings, setUserListings] = useState([]);
   const [userReviews, setUserReviews] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -24,52 +25,118 @@ export const UserProfile = () => {
             credentials: 'include',
           }
         );
+
+        if (res.status === 401) {
+          // User not authenticated, redirect to login
+          navigate('/auth/signin');
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch user profile');
+        }
+
         const data = await res.json();
 
         if (data.success) {
           setUserProfile(data.data);
+        } else {
+          setError('Failed to load user profile');
         }
       } catch (error) {
         console.error('Error fetching user profile:', error);
+        setError('Failed to load user profile');
       }
     };
 
     const getUserListings = async () => {
       try {
         const res = await fetch(
-        `http://localhost:3000/api/listings/user/${userId}`,
-        { credentials: 'include' }
-      );
-      const data = await res.json();
+          `http://localhost:3000/api/listings/user/${userId}`,
+          { credentials: 'include' }
+        );
 
-      if (data.success) {
-        setUserListings(data.data);
-      }
+        if (res.status === 401) {
+          // User not authenticated, redirect to login
+          navigate('/auth/signin');
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch user listings');
+        }
+
+        const data = await res.json();
+
+        if (data.success) {
+          setUserListings(data.data);
+        } else {
+          setError('Failed to load user listings');
+        }
       } catch (error) {
         console.error('Error fetching user listings:', error);
+        setError('Failed to load user listings');
       }
     };
 
     const getUserReviews = async () => {
       try {
         const res = await fetch(
-        `http://localhost:3000/api/reviews/user/${userId}`,
-        { credentials: 'include' }
-      );
-      const data = await res.json();
+          `http://localhost:3000/api/reviews/user/${userId}`,
+          { credentials: 'include' }
+        );
 
-      if (data.success) {
-        setUserReviews(data.data);
-      }
+        if (res.status === 401) {
+          // User not authenticated, redirect to login
+          navigate('/auth/signin');
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch user reviews');
+        }
+
+        const data = await res.json();
+
+        if (data.success) {
+          setUserReviews(data.data);
+        } else {
+          setError('Failed to load user reviews');
+        }
       } catch (error) {
         console.error('Error fetching user reviews:', error);
+        setError('Failed to load user reviews');
       }
     };
 
     fetchUserProfile();
     getUserListings();
     getUserReviews();
-  }, [userId]);
+  }, [userId, navigate]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button
+            onClick={() => navigate('/home/feed')}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userProfile) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-center text-gray-500">Loading profile...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

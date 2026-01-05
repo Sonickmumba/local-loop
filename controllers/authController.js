@@ -53,19 +53,17 @@ exports.register = async (req, res, next) => {
       );
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ userId, email }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
-    });
+    // Set user session
+    req.session.userId = userId;
+    req.session.email = email;
 
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
       data: {
-        userId,
+        id: userId,
         name,
         email,
-        token,
       },
     });
   } catch (error) {
@@ -111,29 +109,17 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
-    );
-
-    // Set token in HTTP-only cookie just addded here
-    res.cookie('access_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    // Set user session
+    req.session.userId = user.id;
+    req.session.email = user.email;
 
     res.json({
       success: true,
       message: 'Login successful',
       data: {
-        userId: user.id,
+        id: user.id,
         name: user.name,
         email: user.email,
-        // removed token from response body
       },
     });
   } catch (error) {
@@ -231,12 +217,162 @@ exports.getCurrentUser = async (req, res, next) => {
 };
 
 exports.logout = (req, res) => {
-  res.clearCookie('access_token', {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+  req.session.destroy((err) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ success: false, message: 'Could not log out' });
+    }
+    res.clearCookie('connect.sid'); // Clear session cookie
+    res.json({ success: true, message: 'Logged out' });
   });
-
-  res.json({ success: true, message: 'Logged out' });
 };
 
+// Request password reset
+exports.requestPasswordReset = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required',
+      });
+    }
+
+    // Check if user exists
+    const result = await pool.query('SELECT id FROM users WHERE email = $1', [
+      email,
+    ]);
+
+    // Always return success to prevent email enumeration
+    res.json({
+      success: true,
+      message:
+        'If an account with this email exists, a reset link has been sent.',
+    });
+
+    // If user exists, generate reset token (implement email sending later)
+    if (result.rowCount > 0) {
+      const userId = result.rows[0].id;
+      const resetToken = jwt.sign(
+        { userId, type: 'password_reset' },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      // TODO: Send email with reset link
+      console.log(`Password reset token for ${email}: ${resetToken}`);
+    }
+  } catch (error) {
+    console.error('Password reset request error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+};
+
+// Reset password with token
+exports.refreshToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refresh_token;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token not found',
+      });
+    }
+
+    // Verify refresh token
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
+    );
+
+    if (decoded.type !== 'refresh') {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid refresh token',
+      });
+    }
+
+    // Generate new access token
+    const newAccessToken = jwt.sign(
+      { userId: decoded.userId, email: decoded.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+
+    // Set new access token
+    res.cookie('access_token', newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.json({
+      success: true,
+      message: 'Token refreshed',
+    });
+  } catch (error) {
+    console.error('Token refresh error:', error);
+    res.status(401).json({
+      success: false,
+      message: 'Invalid refresh token',
+    });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token and new password are required',
+      });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded.type !== 'password_reset') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid reset token',
+      });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(12);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    // Update password
+    await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [
+      passwordHash,
+      decoded.userId,
+    ]);
+
+    res.json({
+      success: true,
+      message: 'Password reset successfully',
+    });
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Reset token has expired',
+      });
+    }
+
+    console.error('Password reset error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+};

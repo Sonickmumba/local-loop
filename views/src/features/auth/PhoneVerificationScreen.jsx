@@ -166,7 +166,7 @@ import { sendOtp, verifyOtp } from '../auth/authSlice';
 export function PhoneVerificationScreen() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { otpStatus } = useSelector((state) => state.auth);
+  const { otpSending } = useSelector((state) => state.auth);
   const { authFlow } = useSelector((state) => state.auth);
 
   const [step, setStep] = useState('phone');
@@ -212,9 +212,10 @@ export function PhoneVerificationScreen() {
   };
 
   useEffect(() => {
-    if (authFlow !== 'signup') {
-      navigate('/home/feed', { replace: true });
-    }
+    // TEMPORARILY DISABLED authFlow check for testing
+    // if (authFlow !== 'signup') {
+    //   navigate('/home/feed', { replace: true });
+    // }
   }, [authFlow, navigate]);
 
   return (
@@ -247,10 +248,10 @@ export function PhoneVerificationScreen() {
 
             <button
               type="submit"
-              disabled={otpStatus === 'sending'}
+              disabled={otpSending}
               className="w-full bg-blue-600 text-white py-4 rounded-full"
             >
-              {otpStatus === 'sending' ? 'Sending...' : 'Send Code'}
+              {otpSending ? 'Sending...' : 'Send Code'}
             </button>
           </form>
         ) : (

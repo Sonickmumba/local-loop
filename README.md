@@ -190,21 +190,72 @@ backend/
 
 ```env
 PORT=5000
-NODE_ENV=development
+NODE_ENV=production
 
+# Database
 DB_HOST=localhost
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=your_password
+DB_PORT=5432
+DB_USER=your_db_user
+DB_PASSWORD=your_secure_db_password
 DB_NAME=localloop
+DB_SSL=true
 
-JWT_SECRET=your_secret_key
-JWT_EXPIRES_IN=7d
+# JWT Configuration
+JWT_SECRET=your_very_secure_random_jwt_secret_key_at_least_32_characters
+JWT_REFRESH_SECRET=your_different_very_secure_random_refresh_secret_key
+JWT_EXPIRES_IN=15m
 
-CORS_ORIGIN=http://localhost:3000
+# CORS
+CORS_ORIGIN=https://yourdomain.com
+
+# Email (for password reset - implement later)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+
+# OTP Service
+TEXTFLOW_API_KEY=your_textflow_api_key
+
+# Redis (for production scaling)
+REDIS_URL=redis://localhost:6379
 ```
 
-## 📊 ERD Overview
+## � Production Security Checklist
+
+### ✅ Implemented Security Features
+- [x] **Rate Limiting**: API, auth, and OTP endpoints protected
+- [x] **Security Headers**: Helmet.js with CSP, HSTS, XSS protection
+- [x] **Password Security**: bcrypt hashing with salt rounds 12
+- [x] **Strong Password Requirements**: 8+ chars, uppercase, lowercase, numbers
+- [x] **JWT with HTTP-only Cookies**: XSS protection
+- [x] **Refresh Token System**: Secure token rotation
+- [x] **Input Validation**: express-validator on all inputs
+- [x] **Error Handling**: Secure error responses (no data leakage)
+- [x] **CORS Configuration**: Environment-based origin control
+- [x] **Password Reset**: Secure token-based reset system
+
+### 🔧 Pre-Production Setup Required
+- [ ] **Environment Variables**: Set all production secrets
+- [ ] **Database SSL**: Enable SSL connections
+- [ ] **Redis Setup**: For session storage and rate limiting
+- [ ] **Email Service**: Implement SMTP for password reset emails
+- [ ] **Monitoring**: Set up error logging and monitoring
+- [ ] **SSL Certificate**: HTTPS certificate for production domain
+- [ ] **Database Backup**: Automated backup strategy
+- [ ] **Load Testing**: Test rate limits and performance
+
+### 🚨 Security Best Practices
+1. **Never commit secrets** to version control
+2. **Use environment variables** for all configuration
+3. **Enable SSL/TLS** in production
+4. **Regular dependency updates** and security audits
+5. **Monitor authentication logs** for suspicious activity
+6. **Implement account lockout** after failed attempts
+7. **Use prepared statements** (already implemented with pg)
+8. **Regular security testing** and penetration testing
+
+## ��📊 ERD Overview
 
 ```
 users (1) ──── (M) listings

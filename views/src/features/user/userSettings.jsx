@@ -1,6 +1,8 @@
 // import { Screen } from '../App';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Bell, Lock, MapPin, HelpCircle, LogOut, ChevronRight } from 'lucide-react';
+import { useDispatch } from 'react-redux';
+import { logoutUser } from '../auth/authSlice';
 
 // interface SettingsScreenProps {
 //   navigate: (screen: Screen, state?: any) => void;
@@ -8,6 +10,7 @@ import { ArrowLeft, Bell, Lock, MapPin, HelpCircle, LogOut, ChevronRight } from 
 
 export const UserSettings = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
   const settingSections = [
     {
       title: 'Account',
@@ -77,7 +80,10 @@ export const UserSettings = () => {
 
         {/* Logout */}
         <button
-          onClick={() => navigate('/welcome')}
+          onClick={() => {
+            dispatch(logoutUser());
+            navigate('/welcome');
+          }}
           className="w-full bg-white border border-red-300 text-red-600 py-4 rounded-xl hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
         >
           <LogOut className="w-5 h-5" />

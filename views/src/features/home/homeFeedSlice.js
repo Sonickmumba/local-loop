@@ -3,14 +3,17 @@ import axios from 'axios';
 
 export const fetchHomeFeed = createAsyncThunk(
   'homeFeed/fetchHomeFeed',
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, dispatch }) => {
     try {
-      const res = await axios.get(
-        'http://localhost:3000/api/listings/',
-        { withCredentials: true }
-      );
+      const res = await axios.get('http://localhost:3000/api/listings/', {
+        withCredentials: true,
+      });
       return res.data.data; // array of listings
     } catch (err) {
+      if (err.response?.status === 401) {
+        // Redirect to login will be handled by RequireAuth
+        return rejectWithValue('Authentication required');
+      }
       return rejectWithValue(
         err.response?.data?.message || 'Failed to load feed'
       );
