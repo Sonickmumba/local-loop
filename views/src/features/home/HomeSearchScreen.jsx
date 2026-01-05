@@ -15,15 +15,12 @@ export const HomeSearchScreen = () => {
 
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  
-  
 
   // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
-  
 
   // Fetch listings when filters or debouncedQuery change
   useEffect(() => {
@@ -33,15 +30,22 @@ export const HomeSearchScreen = () => {
 
         let url = `http://localhost:3000/api/listings?`;
 
-        if (debouncedQuery) url += `search=${encodeURIComponent(debouncedQuery)}&`;
-        if (typeFilter === 'offer' || typeFilter === 'need') url += `type=${typeFilter}&`;
-        if (['skills', 'goods', 'services'].includes(categoryFilter)) url += `category=${categoryFilter}&`;
+        if (debouncedQuery)
+          url += `search=${encodeURIComponent(debouncedQuery)}&`;
+        if (typeFilter === 'offer' || typeFilter === 'need')
+          url += `type=${typeFilter}&`;
+        if (['skills', 'goods', 'services'].includes(categoryFilter))
+          url += `category=${categoryFilter}&`;
 
         url = url.replace(/&$/, '');
         const { data } = await axios.get(url, { withCredentials: true });
         if (data.success) setResults(data.data);
       } catch (err) {
         console.error('Error fetching listings:', err);
+        if (err.response?.status === 401) {
+          navigate('/auth/signin');
+          return;
+        }
         setResults([]);
       } finally {
         setLoading(false);
@@ -50,7 +54,7 @@ export const HomeSearchScreen = () => {
 
     fetchListings();
   }, [debouncedQuery, typeFilter, categoryFilter]);
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -131,7 +135,6 @@ export const HomeSearchScreen = () => {
 
       {/* Results */}
       <div className="px-4 py-4 space-y-3">
-
         <div className="text-sm text-gray-600 mb-4">
           {loading ? 'Loading...' : `${results.length} results found`}
         </div>
@@ -139,7 +142,6 @@ export const HomeSearchScreen = () => {
         {results.map((result) => (
           <div
             key={result.id}
-
             onClick={() => navigate(`/listing-details/${result.id}`)}
             className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
           >
