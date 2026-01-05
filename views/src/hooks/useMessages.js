@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import socket from '/src/features/util/socket.js';
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
 export const useMessages = (chatId, authUserId) => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
@@ -24,7 +26,12 @@ export const useMessages = (chatId, authUserId) => {
           setMessages(uniqueMessages);
         }
       })
-      .catch((err) => console.error('Failed to fetch messages', err));
+      .catch((err) => {
+        console.error('Failed to fetch messages', err);
+        if (err.response?.status === 401) {
+          navigate('/auth/signin');
+        }
+      });
 
     // Socket setup
     if (!socket.connected) {
