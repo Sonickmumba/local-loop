@@ -29,6 +29,7 @@ import { ChatList } from './features/chat/ChatList.jsx';
 
 import './App.css';
 import { NotificationsScreen } from './features/notification/NotificationsScreen.jsx';
+import { TradeNegotiationScreen } from './features/trade/TradeNegotiatonScreen.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -126,6 +127,7 @@ function App() {
             </RequireAuth>
           }
         />
+        <Route path="/trade-negotiation" element={<TradeNegotiationScreen />} />
       </Routes>
     </div>
     // </Router>
