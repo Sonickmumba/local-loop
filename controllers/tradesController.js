@@ -36,8 +36,8 @@ exports.createTrade = async (req, res, next) => {
 
     // check if listing exists and is available
     const listingResult = await pool.query(
-      'SELECT * FROM listings WHERE id = $1 AND status = true',
-      [listingId]
+      'SELECT * FROM listings WHERE id = $1 AND status = $2',
+      [listingId, 'active']
     );
     if (listingResult.rows.length === 0) {
       return res
@@ -47,22 +47,50 @@ exports.createTrade = async (req, res, next) => {
 
     // create trade proposal now
     const tradeId = generateId();
-    const tradeProposalResult = await pool.query(
-      `INSERT INTO trades 
-      (id, listing_id, requester_id, owner_id, requester_offer, trade_date, trade_time, location, notes) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [
-        tradeId,
-        listingId,
-        requesterId,
-        ownerId,
-        requesterOffer,
-        tradeDate,
-        tradeTime,
-        location,
-        notes,
-      ]
-    );
+    // const tradeProposalResult = await pool.query(
+    //   `INSERT INTO trades
+    //   (id, listing_id, requester_id, owner_id, requester_offer, trade_date, trade_time, location, notes)
+    //   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+    //   [
+    //     tradeId,
+    //     listingId,
+    //     requesterId,
+    //     ownerId,
+    //     requesterOffer,
+    //     tradeDate,
+    //     tradeTime,
+    //     location,
+    //     notes,
+    //   ]
+    // );
+
+    try {
+      await pool.query(
+        `INSERT INTO trades
+     (id, listing_id, requester_id, owner_id, requester_offer,
+      trade_date, trade_time, location, notes)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+        [
+          tradeId,
+          listingId,
+          requesterId,
+          ownerId,
+          requesterOffer,
+          tradeDate,
+          tradeTime,
+          location,
+          notes,
+        ]
+      );
+    } catch (err) {
+      if (err.code === '23505') {
+        return res.status(409).json({
+          success: false,
+          message: 'You already have a pending trade for this listing',
+        });
+      }
+      throw err;
+    }
 
     // create notification for this created trade
     const notificationId = generateId();
@@ -99,7 +127,7 @@ exports.getTradeById = async (req, res, next) => {
     const userId = req.user.userId;
     const id = req.params.id;
     const tradeResult = await pool.query(
-      `SELECT t.*, l.title AS listing_title, l.type AS listing_type, u1.name AS requester_name, u1.rating as requester_rating, u2.name AS owner_name, u2.rating as owner_rating FROM trades t JOIN listings l ON t.listing_id = l.id JOIN users u1 ON t.requester_id = u1.id JOIN users u2 ON t.owner_id = u2.id WHERE t.id = $1 AND (t.requester_id = $2 OR t.owner_id = $2)`,     
+      `SELECT t.*, l.title AS listing_title, l.type AS listing_type, u1.name AS requester_name, u1.rating as requester_rating, u2.name AS owner_name, u2.rating as owner_rating FROM trades t JOIN listings l ON t.listing_id = l.id JOIN users u1 ON t.requester_id = u1.id JOIN users u2 ON t.owner_id = u2.id WHERE t.id = $1 AND (t.requester_id = $2 OR t.owner_id = $2)`,
       [id, userId]
     );
 
@@ -117,7 +145,6 @@ exports.getTradeById = async (req, res, next) => {
     next(error);
   }
 };
-
 
 // Get user's trades
 exports.getUserTrades = async (req, res, next) => {
@@ -156,13 +183,12 @@ exports.getUserTrades = async (req, res, next) => {
     res.json({
       success: true,
       count: trades.rows.length,
-      data: trades.rows
+      data: trades.rows,
     });
   } catch (error) {
     next(error);
   }
 };
-
 
 exports.updateTradeStatus = async (req, res, next) => {
   try {
@@ -175,7 +201,7 @@ exports.updateTradeStatus = async (req, res, next) => {
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid status value'
+        message: 'Invalid status value',
       });
     }
 
@@ -196,7 +222,7 @@ exports.updateTradeStatus = async (req, res, next) => {
         await client.query('ROLLBACK');
         return res.status(404).json({
           success: false,
-          message: 'Trade not found or access denied'
+          message: 'Trade not found or access denied',
         });
       }
 
@@ -207,7 +233,7 @@ exports.updateTradeStatus = async (req, res, next) => {
         await client.query('ROLLBACK');
         return res.status(400).json({
           success: false,
-          message: `Cannot change status from ${trade.status} to ${status}`
+          message: `Cannot change status from ${trade.status} to ${status}`,
         });
       }
 
@@ -221,7 +247,7 @@ exports.updateTradeStatus = async (req, res, next) => {
         WHERE id = $2
         RETURNING *
       `;
-      
+
       const updatedTrade = await client.query(updateQuery, [status, id]);
 
       // Handle completed status
@@ -244,14 +270,13 @@ exports.updateTradeStatus = async (req, res, next) => {
       }
 
       // Create notification
-      const partnerId = trade.requester_id === userId 
-        ? trade.owner_id 
-        : trade.requester_id;
-      
+      const partnerId =
+        trade.requester_id === userId ? trade.owner_id : trade.requester_id;
+
       const notificationTitles = {
         accepted: 'Trade accepted',
         completed: 'Trade completed',
-        cancelled: 'Trade cancelled'
+        cancelled: 'Trade cancelled',
       };
 
       if (notificationTitles[status]) {
@@ -269,9 +294,8 @@ exports.updateTradeStatus = async (req, res, next) => {
       res.json({
         success: true,
         message: 'Trade status updated successfully',
-        data: updatedTrade.rows[0]
+        data: updatedTrade.rows[0],
       });
-
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;
@@ -288,9 +312,9 @@ function isValidStatusTransition(currentStatus, newStatus) {
   const allowedTransitions = {
     pending: ['accepted', 'cancelled'],
     accepted: ['completed', 'cancelled'],
-    completed: [], 
-    cancelled: []  
+    completed: [],
+    cancelled: [],
   };
-  
+
   return allowedTransitions[currentStatus]?.includes(newStatus) || false;
 }
