@@ -1,31 +1,82 @@
 import { useState } from 'react';
 // import { Screen } from '../App';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Calendar, MapPin, MessageSquare } from 'lucide-react';
 
-// interface TradeNegotiationScreenProps {
-//   navigate: (screen: Screen, state?: any) => void;
-// }
+const API_BASE_URL = 'http://localhost:3000/api';
 
 export function TradeNegotiationScreen() {
-    const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    date: '',
-    time: '',
-    location: '',
-    notes: ''
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { listingId, ownerId, listingTitle, ownerName } = location.state || {};
+  console.log('Trade Context:', {
+    listingId,
+    ownerId,
+    listingTitle,
+    ownerName,
   });
 
-  const handleSubmit = (e) => {
+  const [formData, setFormData] = useState({
+    tradeDate: '',
+    tradeTime: '',
+    location: '',
+    notes: '',
+    requesterOffer: '',
+  });
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('trade-management', { selectedTradeId: 'new-trade' });
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/trades`, {
+        method: 'POST',
+        credentials: 'include', // REQUIRED for cookie auth
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          listingId,
+          ownerId,
+          requesterOffer: formData.requesterOffer,
+          tradeDate: formData.tradeDate,
+          tradeTime: formData.tradeTime,
+          location: formData.location,
+          notes: formData.notes,
+        }),
+      });
+
+      const data = await res.json();
+
+    //   if (!res.ok) {
+    //     throw new Error(data.message || 'Failed to create trade');
+    //   }
+
+      if (!res.ok) {
+        if (res.status === 409) {
+          throw new Error('You already proposed a trade for this listing');
+        }
+        throw new Error(data.message);
+      }
+
+      navigate('/trade-management', {
+        state: { selectedTradeId: data.trade.id },
+      });
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
   };
 
-  const listing = {
-    title: 'Guitar lessons',
-    owner: 'Sarah Martinez',
-    type: 'offer'
-  };
+  //   const listing = {
+  //     title: 'Guitar lessons',
+  //     owner: 'Sarah Martinez',
+  //     type: 'offer',
+  //   };
+
+  if (!listingId || !ownerId) {
+    return <div className="p-4 text-red-600">Invalid trade context</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -51,14 +102,14 @@ export function TradeNegotiationScreen() {
               SM
             </div>
             <div>
-              <div className="mb-1">{listing.owner}</div>
+              <div className="mb-1">{ownerName}</div>
               <div className="text-sm text-gray-600">⭐ 4.8 rating</div>
             </div>
           </div>
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-2xl">🎸</span>
-              <div>{listing.title}</div>
+              <div>{listingTitle}</div>
             </div>
             <div className="text-sm text-gray-600">What they're offering</div>
           </div>
@@ -80,8 +131,10 @@ export function TradeNegotiationScreen() {
               <input
                 type="date"
                 id="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                value={formData.tradeDate}
+                onChange={(e) =>
+                  setFormData({ ...formData, tradeDate: e.target.value })
+                }
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -95,8 +148,10 @@ export function TradeNegotiationScreen() {
               <input
                 type="time"
                 id="time"
-                value={formData.time}
-                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                value={formData.tradeTime}
+                onChange={(e) =>
+                  setFormData({ ...formData, tradeTime: e.target.value })
+                }
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -114,7 +169,9 @@ export function TradeNegotiationScreen() {
                 type="text"
                 id="location"
                 value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, location: e.target.value })
+                }
                 placeholder="e.g., Central Park Cafe"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
@@ -132,7 +189,9 @@ export function TradeNegotiationScreen() {
               <textarea
                 id="notes"
                 value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
                 placeholder="Any additional details or questions..."
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
@@ -147,9 +206,14 @@ export function TradeNegotiationScreen() {
               Let them know what skills, goods, or services you can provide
             </p>
             <textarea
+              value={formData.requesterOffer}
+              onChange={(e) =>
+                setFormData({ ...formData, requesterOffer: e.target.value })
+              }
               placeholder="e.g., I can help with web design, or I have fresh vegetables from my garden..."
               rows={3}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              required
             />
           </div>
 
