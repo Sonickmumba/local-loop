@@ -30,6 +30,7 @@ import { ChatList } from './features/chat/ChatList.jsx';
 import './App.css';
 import { NotificationsScreen } from './features/notification/NotificationsScreen.jsx';
 import { TradeNegotiationScreen } from './features/trade/TradeNegotiatonScreen.jsx';
+import { TradeManagementScreen } from './features/trade/TradeManagementScreen.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -128,6 +129,7 @@ function App() {
           }
         />
         <Route path="/trade-negotiation" element={<TradeNegotiationScreen />} />
+        <Route path='/trade-management' element={<TradeManagementScreen />} />
       </Routes>
     </div>
     // </Router>
