@@ -10,39 +10,87 @@ export const ListingDetails = () => {
   const { listingId } = useParams();
   const user = useSelector((state) => state.auth.user);
   const [listing, setListing] = useState(null);
+  const [error, setError] = useState(null);
 
   const [similarListings, setSimilarListings] = useState([]);
 
   useEffect(() => {
     const fetchSimilarListings = async () => {
-      const res = await fetch(
-        `http://localhost:3000/api/listings/${listingId}/similar`
-      );
-      const data = await res.json();
+      try {
+        const res = await fetch(
+          `http://localhost:3000/api/listings/${listingId}/similar`,
+          { credentials: 'include' }
+        );
 
-      if (data.success) {
-        setSimilarListings(data.data);
+        if (res.status === 401) {
+          // User not authenticated, redirect will be handled by RequireAuth
+          return;
+        }
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch similar listings');
+        }
+
+        const data = await res.json();
+
+        if (data.success) {
+          setSimilarListings(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching similar listings:', error);
+        // Don't set error state, just log it
       }
     };
 
     // Fetch listing details from API
     async function fetchListing() {
-      // Replace with actual API call
-      const response = await fetch(
-        `http://localhost:3000/api/listings/${listingId}`
-      );
-      const result = await response.json();
-      setListing(result.data);
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/listings/${listingId}`,
+          { credentials: 'include' }
+        );
+
+        if (response.status === 401) {
+          // User not authenticated, redirect will be handled by RequireAuth
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch listing');
+        }
+
+        const result = await response.json();
+        setListing(result.data);
+      } catch (error) {
+        console.error('Error fetching listing:', error);
+        setError('Failed to load listing');
+      }
     }
 
     fetchListing();
     fetchSimilarListings();
   }, [listingId]);
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button
+            onClick={() => navigate('/home/feed')}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!listing) {
     return <div>Loading...</div>;
   }
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
