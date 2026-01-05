@@ -6,8 +6,8 @@ const { Server } = require('socket.io');
 
 const cors = require('cors');
 const errorHandler = require('./middleware/errorHandler');
-const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const securityHeaders = require('./middleware/securityHeaders');
 const { apiLimiter } = require('./middleware/rateLimiting');
 
@@ -39,6 +39,18 @@ app.set('io', io);
 app.use(securityHeaders);
 app.use(apiLimiter);
 app.use(cookieParser());
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    },
+  })
+);
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
