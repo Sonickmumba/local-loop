@@ -60,7 +60,7 @@ export function HomeFeedScreen() {
               <h2>LocalLoop</h2>
             </div>
             <button
-              onClick={() => navigate('notifications')}
+              onClick={() => navigate('/notifications')}
               className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <Bell className="w-6 h-6" />

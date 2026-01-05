@@ -28,6 +28,7 @@ import { ChatConversation } from './features/chat/ChatConversation.jsx';
 import { ChatList } from './features/chat/ChatList.jsx';
 
 import './App.css';
+import { NotificationsScreen } from './features/notification/NotificationsScreen.jsx';
 
 function App() {
   const dispatch = useDispatch();
@@ -114,6 +115,7 @@ function App() {
             </RequireAuth>
           }
         />
+        <Route path="/notifications" element={<NotificationsScreen />} />
       </Routes>
     </div>
     // </Router>
