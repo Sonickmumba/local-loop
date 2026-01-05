@@ -209,6 +209,14 @@ exports.sendMessage = async (req, res, next) => {
         ? conversation.participant2_id
         : conversation.participant1_id;
 
+    // Get sender's name for notification
+    const senderResult = await pool.query(
+      'SELECT name FROM users WHERE id = $1',
+      [userId]
+    );
+    const senderName = senderResult.rows[0]?.name || 'Unknown User';
+    console.log('SENDER NAME:', senderName);
+
     const notificationId = generateId();
     await pool.query(
       `INSERT INTO notifications (id, user_id, type, title, description, reference_id)
@@ -217,7 +225,7 @@ exports.sendMessage = async (req, res, next) => {
         notificationId,
         recipientId,
         'message',
-        'New message',
+        `New message from ${senderName}`,
         content.substring(0, 100),
         conversationId,
       ]
@@ -235,7 +243,6 @@ exports.sendMessage = async (req, res, next) => {
 
     // Broadcast via Socket.IO to the room
     io.to(conversationId).emit('new_message', newMessage);
-
 
     res.status(201).json({
       success: true,

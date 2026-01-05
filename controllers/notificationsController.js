@@ -1,39 +1,62 @@
 const pool = require('../config/db');
+const { timeAgo } = require('../utils/helpers');
 
+// Create notification helper function
+exports.createNotification = async (
+  userId,
+  type,
+  title,
+  description = null,
+  referenceId = null
+) => {
+  try {
+    const query = `
+      INSERT INTO notifications (user_id, type, title, description, reference_id)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *
+    `;
+    const values = [userId, type, title, description, referenceId];
+
+    const result = await pool.query(query, values);
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error creating notification:', error);
+    throw error;
+  }
+};
 
 exports.getUserNotifications = async (req, res, next) => {
-    try {
-        const userId = req.user.userId;
-        const { unreadOnly } = req.query;
+  try {
+    const userId = req.user.userId;
+    const { unreadOnly } = req.query;
 
-        let query = `SELECT * FROM notifications WHERE user_id = $1`;
-        const params = [userId];
+    let query = `SELECT * FROM notifications WHERE user_id = $1`;
+    const params = [userId];
 
-        if (unreadOnly === 'true') {
-            query += ` AND is_read = false`;
-        }
-
-        query += ` ORDER BY created_at DESC LIMIT 50`;
-
-        const notificationsResult = await pool.query(query, params);
-
-        const { rows } = await pool.query(query, params);
-
-        
-        const notifications = rows.map(notif => ({
-            ...notif,
-            timeAgo: timeAgo(notif.created_at)
-        }));
-
-        res.json({
-            success: true,
-            count: notifications.length,
-            data: notifications
-        });
-    } catch (error) {
-        next(error);
+    if (unreadOnly === 'true') {
+      query += ` AND is_read = false`;
     }
-}
+
+    query += ` ORDER BY created_at DESC LIMIT 50`;
+
+    const notificationsResult = await pool.query(query, params);
+
+    const { rows } = await pool.query(query, params);
+
+    const notifications = rows.map((notif) => ({
+      ...notif,
+      timeAgo: timeAgo(notif.created_at),
+    }));
+
+    res.json({
+      success: true,
+      count: notifications.length,
+      data: notifications,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // Get unread count
 exports.getUnreadCount = async (req, res, next) => {
@@ -48,8 +71,8 @@ exports.getUnreadCount = async (req, res, next) => {
     res.json({
       success: true,
       data: {
-        unreadCount: rows[0].count
-      }
+        unreadCount: rows[0].count,
+      },
     });
   } catch (error) {
     next(error);
@@ -70,13 +93,13 @@ exports.markAsRead = async (req, res, next) => {
     if (rowCount.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Notification not found'
+        message: 'Notification not found',
       });
     }
 
     res.json({
       success: true,
-      message: 'Notification marked as read'
+      message: 'Notification marked as read',
     });
   } catch (error) {
     next(error);
@@ -95,7 +118,7 @@ exports.markAllAsRead = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'All notifications marked as read'
+      message: 'All notifications marked as read',
     });
   } catch (error) {
     next(error);
@@ -116,13 +139,13 @@ exports.deleteNotification = async (req, res, next) => {
     if (rowCount.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'Notification not found'
+        message: 'Notification not found',
       });
     }
 
     res.json({
       success: true,
-      message: 'Notification deleted'
+      message: 'Notification deleted',
     });
   } catch (error) {
     next(error);
