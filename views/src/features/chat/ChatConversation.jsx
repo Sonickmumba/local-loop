@@ -19,7 +19,12 @@ export function ChatConversation() {
   const searchParams = new URLSearchParams(location.search);
   const chatId = searchParams.get('chatId');
 
-  const { conversation, contact, loading: conversationLoading, error: conversationError } = useConversation(chatId);
+  const {
+    conversation,
+    contact,
+    loading: conversationLoading,
+    error: conversationError,
+  } = useConversation(chatId);
   const { messages, sendMessage } = useMessages(chatId, authUserId);
 
   const handleSend = (content) => {
@@ -64,17 +69,32 @@ export function ChatConversation() {
       </div>
     );
   }
+  console.log('Conversation Data:', conversation);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <ChatHeader onBack={() => navigate(-1)} contact={contact} conversation={conversation} />
+      <ChatHeader
+        onBack={() => navigate(-1)}
+        contact={contact}
+        conversation={conversation}
+      />
 
       <MessageList messages={messages} authUserId={authUserId} />
 
       {/* Trade Action */}
       <div className="bg-blue-50 border-t border-blue-200 px-4 py-3">
         <button
-          onClick={() => navigate('/trade-negotiation')}
+          onClick={() =>
+            navigate('/trade-negotiation', {
+              state: {
+                listingId: conversation.listing.id,
+                ownerId: contact.id,
+                listingTitle: conversation.listing.title,
+                ownerName: contact.name,
+              },
+            })
+          }
+          // onClick={() => navigate('/trade-negotiation')}
           className="w-full bg-white border border-blue-300 text-blue-600 py-3 rounded-lg hover:bg-blue-50 transition-colors"
         >
           🤝 Propose a Trade
