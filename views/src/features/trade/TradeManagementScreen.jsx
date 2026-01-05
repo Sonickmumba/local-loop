@@ -10,31 +10,13 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+// import { formatTradeDate } from '../util/date';
 
-// interface TradeManagementScreenProps {
-//   navigate: (screen: Screen, state?: any) => void;
-//   tradeId?: string;
-// }
-
-export function TradeManagementScreen({ tradeId }) {
+export function TradeManagementScreen() {
   const location = useLocation();
   const navigate = useNavigate();
   const tradeDataId = location.state?.selectedTradeId;
   const [trade, setTrade] = useState(null);
-  console.log('Trade Data from State:', tradeDataId);
-
-  // const trade = {
-  //   id: tradeId || '1',
-  //   status: 'pending', // as 'pending' | 'accepted' | 'completed' | 'cancelled',
-  //   partner: 'Sarah Martinez',
-  //   partnerId: 'user1',
-  //   listing: 'Guitar lessons',
-  //   date: 'Saturday, Dec 28, 2024',
-  //   time: '2:00 PM',
-  //   location: 'Central Park Cafe',
-  //   myOffer: 'Web design help for your portfolio',
-  //   notes: 'Looking forward to learning! I have a guitar already.'
-  // };
 
   const handleAccept = () => {
     alert('Trade accepted! You can now chat to finalize details.');
@@ -46,21 +28,15 @@ export function TradeManagementScreen({ tradeId }) {
   };
 
   useEffect(() => {
-    // Fetch trade details from API using tradeId or tradeDataId
     const fetchTradeDetails = async (id) => {
-      // Example API call
       const res = await fetch(`http://localhost:3000/api/trades/${id}`, {
         credentials: 'include',
       });
       const data = await res.json();
-      console.log('Fetched Trade Details:', data);
       setTrade(data.trade);
     };
     fetchTradeDetails(tradeDataId);
-    // For now, using mock data above
-  }, [tradeId, tradeDataId]);
-
-  console.log('Trade Details:', trade);
+  }, [tradeDataId]);
 
   if (!trade) {
     return (
@@ -76,7 +52,7 @@ export function TradeManagementScreen({ tradeId }) {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="px-4 py-4 flex items-center gap-3">
           <button
-            onClick={() => navigate('home')}
+            onClick={() => navigate('/home/feed')}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
