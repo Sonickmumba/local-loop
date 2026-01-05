@@ -142,3 +142,9 @@ CREATE INDEX idx_listings_user ON listings(user_id);
 CREATE INDEX idx_listings_location ON listings(location_lat, location_lng);
 CREATE INDEX idx_messages_conversation ON messages(conversation_id);
 CREATE INDEX idx_notifications_user ON notifications(user_id);
+
+-- Add updated_at trigger functions
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_pending_trade_per_user_listing
+ON trades (listing_id, requester_id)
+WHERE status = 'pending';
+
