@@ -48,10 +48,6 @@ export function TradeNegotiationScreen() {
 
       const data = await res.json();
 
-    //   if (!res.ok) {
-    //     throw new Error(data.message || 'Failed to create trade');
-    //   }
-
       if (!res.ok) {
         if (res.status === 409) {
           throw new Error('You already proposed a trade for this listing');
@@ -67,12 +63,6 @@ export function TradeNegotiationScreen() {
       alert(err.message);
     }
   };
-
-  //   const listing = {
-  //     title: 'Guitar lessons',
-  //     owner: 'Sarah Martinez',
-  //     type: 'offer',
-  //   };
 
   if (!listingId || !ownerId) {
     return <div className="p-4 text-red-600">Invalid trade context</div>;

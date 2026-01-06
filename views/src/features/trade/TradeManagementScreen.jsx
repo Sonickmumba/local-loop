@@ -13,20 +13,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { formatTradeDate } from '../util/date';
 import { useSelector } from 'react-redux';
 
-export function TradeManagementScreen() {
+export const TradeManagementScreen = () => {
   const currentUserId = useSelector((state) => state.auth.user.id);
-
 
   const location = useLocation();
   const navigate = useNavigate();
   const tradeDataId = location.state?.selectedTradeId;
   const [trade, setTrade] = useState(null);
-
-  // const handleAccept = () => {
-  //   alert('Trade accepted! You can now chat to finalize details.');
-  //   // navigate('/chat-conversation', {state:{ selectedChatId: trade.id }});
-  //   navigate(-1);
-  // };
 
   const handleAccept = async () => {
     try {
@@ -55,10 +48,6 @@ export function TradeManagementScreen() {
       alert(err.message);
     }
   };
-
-  // const handleComplete = () => {
-  //   navigate('review-rating');
-  // };
 
   const handleComplete = async () => {
     try {
@@ -117,17 +106,11 @@ export function TradeManagementScreen() {
     );
   }
 
-
   const isRequester = trade.requester_id === currentUserId;
 
-  const revieweeId = isRequester
-    ? trade.owner_id
-    : trade.requester_id;
+  const revieweeId = isRequester ? trade.owner_id : trade.requester_id;
 
-  const partnerName = isRequester
-    ? trade.owner_name
-    : trade.requester_name;
-  console.log(trade);
+  const partnerName = isRequester ? trade.owner_name : trade.requester_name;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -326,8 +309,8 @@ export function TradeManagementScreen() {
                     partnerName,
                     listingTitle: trade.listing_title,
                   },
-                })}
-              }
+                });
+              }}
               className="w-full bg-blue-600 text-white py-4 rounded-full hover:bg-blue-700 transition-colors"
             >
               Leave a Review
