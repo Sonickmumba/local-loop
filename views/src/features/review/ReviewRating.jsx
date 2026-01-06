@@ -1,36 +1,17 @@
-import { useState, useEffect } from 'react';
-// import { Screen } from '../App';
+import { useState } from 'react';
 import { ArrowLeft, Star } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-
-// interface ReviewRatingScreenProps {
-//   navigate: (screen: Screen, state?: any) => void;
-// }
 
 export const ReviewRating = () => {
   const navigate = useNavigate();
-
   const location = useLocation();
-  const currentUserId = useSelector((state) => state.auth.user.id);
-  // const tradeId = location.state?.tradeId;
 
-  //   const { tradeId, revieweeId } = location.state || {};
   const { tradeId, revieweeId, partnerName, listingTitle } =
     location.state || {};
-  //   const trade = location.state?.trade;
-
-  //   console.log(trade)
 
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [review, setReview] = useState('');
-
-  //   const handleSubmit = (e) => {
-  //     e.preventDefault();
-  //     alert('Thank you for your review!');
-  //     navigate('home');
-  //   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
