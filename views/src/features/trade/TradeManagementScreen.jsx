@@ -10,31 +10,99 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-// import { formatTradeDate } from '../util/date';
+import { formatTradeDate } from '../util/date';
+import { useSelector } from 'react-redux';
 
 export function TradeManagementScreen() {
+  const currentUserId = useSelector((state) => state.auth.user.id);
+
+
   const location = useLocation();
   const navigate = useNavigate();
   const tradeDataId = location.state?.selectedTradeId;
   const [trade, setTrade] = useState(null);
 
-  const handleAccept = () => {
-    alert('Trade accepted! You can now chat to finalize details.');
-    // navigate('/chat-conversation', {state:{ selectedChatId: trade.id }});
-    navigate(-1);
+  // const handleAccept = () => {
+  //   alert('Trade accepted! You can now chat to finalize details.');
+  //   // navigate('/chat-conversation', {state:{ selectedChatId: trade.id }});
+  //   navigate(-1);
+  // };
+
+  const handleAccept = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:3000/api/trades/${trade.id}/status`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ status: 'accepted' }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to accept trade');
+      }
+
+      // update UI immediately
+      setTrade(data.data);
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
   };
 
-  const handleComplete = () => {
-    navigate('review-rating');
+  // const handleComplete = () => {
+  //   navigate('review-rating');
+  // };
+
+  const handleComplete = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:3000/api/trades/${trade.id}/status`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ status: 'completed' }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to complete trade');
+      }
+
+      // Update UI immediately
+      setTrade(data.data);
+
+      // Optional: move to review screen
+
+      // navigate('/review-rating', {
+      //   state: { tradeId: trade.id },
+      // });
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   useEffect(() => {
     if (!tradeDataId) return;
 
     const fetchTradeDetails = async () => {
-      const res = await fetch(`http://localhost:3000/api/trades/${tradeDataId}`, {
-        credentials: 'include',
-      });
+      const res = await fetch(
+        `http://localhost:3000/api/trades/${tradeDataId}`,
+        {
+          credentials: 'include',
+        }
+      );
       const data = await res.json();
       setTrade(data.trade);
     };
@@ -48,6 +116,18 @@ export function TradeManagementScreen() {
       </div>
     );
   }
+
+
+  const isRequester = trade.requester_id === currentUserId;
+
+  const revieweeId = isRequester
+    ? trade.owner_id
+    : trade.requester_id;
+
+  const partnerName = isRequester
+    ? trade.owner_name
+    : trade.requester_name;
+  console.log(trade);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -122,13 +202,15 @@ export function TradeManagementScreen() {
           >
             <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
               {trade.requester_name
-              .split(' ').map((n) => n[0])
-              .join('')
-                }
+                ?.split(' ')
+                .map((n) => n[0])
+                .join('')}
             </div>
             <div className="flex-1 text-left">
               <div className="mb-1">{trade.requester_name}</div>
-              <div className="text-sm text-gray-600">⭐ {trade.requester_rating} • 23 trades</div>
+              <div className="text-sm text-gray-600">
+                ⭐ {trade.requester_rating} • 23 trades
+              </div>
             </div>
           </button>
         </div>
@@ -163,7 +245,7 @@ export function TradeManagementScreen() {
                 <Calendar className="w-5 h-5 text-gray-400" />
                 <div>
                   <div className="text-sm text-gray-600">Date</div>
-                  <div>{trade.trade_date}</div>
+                  <div>{formatTradeDate(trade.trade_date)}</div>
                 </div>
               </div>
 
@@ -222,7 +304,9 @@ export function TradeManagementScreen() {
               </button>
               <button
                 onClick={() =>
-                  navigate('chat-conversation', { selectedChatId: trade.id })
+                  navigate('/chat-conversation', {
+                    state: { selectedChatId: trade.id },
+                  })
                 }
                 className="w-full bg-white border border-blue-600 text-blue-600 py-4 rounded-full hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
               >
@@ -234,7 +318,16 @@ export function TradeManagementScreen() {
 
           {trade.status === 'completed' && (
             <button
-              onClick={() => navigate('review-rating')}
+              onClick={() => {
+                navigate('/review-rating', {
+                  state: {
+                    tradeId: trade.id,
+                    revieweeId,
+                    partnerName,
+                    listingTitle: trade.listing_title,
+                  },
+                })}
+              }
               className="w-full bg-blue-600 text-white py-4 rounded-full hover:bg-blue-700 transition-colors"
             >
               Leave a Review
