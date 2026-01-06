@@ -4,26 +4,15 @@ export const formatMonthYear = (date) =>
     year: 'numeric',
   });
 
-  export const formatTradeDate = (isoString) => {
+export const formatTradeDate = (isoString) => {
+  if (!isoString) return '';
+
   const date = new Date(isoString);
 
-  const day = date.toLocaleDateString('en-US', {
-    weekday: 'long'
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
-
-  const month = date.toLocaleDateString('en-US', {
-    month: 'short'
-  });
-
-  const dayOfMonth = date.getDate();
-
-  const year = date.getFullYear();
-
-  return {
-    day,        // Saturday
-    month,      // Dec
-    date: dayOfMonth, // 28
-    year        // 2026
-  };
 }
-
