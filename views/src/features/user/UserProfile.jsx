@@ -2,7 +2,8 @@
 import { ArrowLeft, MapPin, Calendar, Star, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { formatMonthYear } from '../util/date';
+import { formatMonthYear, timeAgo } from '../util/date';
+import { useSelector } from 'react-redux';
 
 export const UserProfile = () => {
   const navigate = useNavigate();
@@ -14,8 +15,12 @@ export const UserProfile = () => {
   const [userReviews, setUserReviews] = useState([]);
   const [error, setError] = useState(null);
 
+  const { isAuthenticated, initialized } = useSelector((state) => state.auth);
+
   useEffect(() => {
     if (!userId) return;
+    if (!initialized) return;
+    if (userId === 'me' && !isAuthenticated) return;
 
     const fetchUserProfile = async () => {
       try {
@@ -112,7 +117,7 @@ export const UserProfile = () => {
     fetchUserProfile();
     getUserListings();
     getUserReviews();
-  }, [userId, navigate]);
+  }, [userId, navigate, initialized, isAuthenticated]);
 
   if (error) {
     return (
@@ -196,13 +201,13 @@ export const UserProfile = () => {
                 <div className="text-2xl">{userProfile?.rating ?? 0}</div>
               </div>
               <div className="text-sm text-gray-600">
-                Rating ({userProfile?.totalRatings ?? 0})
+                Rating ({userProfile?.total_ratings ?? 0})
               </div>
             </div>
             <div className="text-center">
               <div className="text-2xl mb-1">🤝</div>
               <div className="text-2xl">
-                {userProfile?.completedTrades ?? 0}
+                {userProfile?.completed_trades ?? 0}
               </div>
               <div className="text-sm text-gray-600">Trades</div>
             </div>
@@ -253,7 +258,7 @@ export const UserProfile = () => {
                 </div>
                 <div className="mb-2">{listing.title}</div>
                 <div className="text-sm text-gray-600">
-                  {listing.responses ?? 0} responses
+                  {listing.responses_count ?? 0} responses
                 </div>
               </div>
             ))}
@@ -272,7 +277,7 @@ export const UserProfile = () => {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-                    <div>{review.author}</div>
+                    <div>{review.reviewer_name}</div>
                   </div>
                   <div className="flex items-center gap-1">
                     {Array.from({ length: review.rating }).map((_, i) => (
@@ -283,8 +288,10 @@ export const UserProfile = () => {
                     ))}
                   </div>
                 </div>
-                <p className="text-gray-700 mb-1">{review.text}</p>
-                <div className="text-sm text-gray-500">{review.date}</div>
+                <p className="text-gray-700 mb-1">{review.content}</p>
+                <div className="text-sm text-gray-500">
+                  {timeAgo(review.created_at)}
+                </div>
               </div>
             ))}
           </div>

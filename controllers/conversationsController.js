@@ -124,8 +124,6 @@ exports.getMessages = async (req, res, next) => {
     const { chatId } = req.params;
     const userId = req.user.userId;
 
-    console.log('REQ.USER:', req.user);
-
     // check if user is part of the conversation
     const conversationResult = await pool.query(
       `SELECT * FROM conversations WHERE id = $1 AND (participant1_id = $2 OR participant2_id = $3)`,

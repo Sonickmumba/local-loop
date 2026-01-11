@@ -111,7 +111,7 @@ export const TradeManagementScreen = () => {
   const revieweeId = isRequester ? trade.owner_id : trade.requester_id;
 
   const partnerName = isRequester ? trade.owner_name : trade.requester_name;
-
+ 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -209,7 +209,7 @@ export const TradeManagementScreen = () => {
               </div>
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-2">
                 <span className="text-2xl">🎸</span>
-                <div>{trade.requester_offer}</div>
+                <div>{trade.listing_title}</div>
               </div>
             </div>
 
@@ -219,7 +219,7 @@ export const TradeManagementScreen = () => {
               </div>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center gap-2">
                 <span className="text-2xl">💻</span>
-                <div>{trade.listing_title}</div>
+                <div>{trade.requester_offer}</div>
               </div>
             </div>
 
@@ -286,11 +286,14 @@ export const TradeManagementScreen = () => {
                 Mark as Completed
               </button>
               <button
-                onClick={() =>
-                  navigate('/chat-conversation', {
-                    state: { selectedChatId: trade.id },
-                  })
-                }
+                // onClick={() =>
+                //   navigate('/chat-conversation', {
+                //     state: { selectedChatId: trade.id },
+                //   })
+                // }
+
+
+                onClick={() => navigate(`/chat-conversation?chatId=${trade.id}`)}
                 className="w-full bg-white border border-blue-600 text-blue-600 py-4 rounded-full hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
               >
                 <MessageSquare className="w-5 h-5" />

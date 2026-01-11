@@ -106,6 +106,7 @@ const authSlice = createSlice({
   name: 'auth',
   initialState: {
     user: null,
+    isAuthenticated: false,
     status: 'idle',
     error: null,
     authFlow: null, // 'signup' | 'signin'
@@ -150,26 +151,33 @@ const authSlice = createSlice({
     },
     logout(state) {
       state.user = null;
+      state.isAuthenticated = false;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(signupUser.fulfilled, (state, action) => {
         state.user = action.payload;
+        state.isAuthenticated = true;
       })
       .addCase(signinUser.fulfilled, (state, action) => {
         state.user = action.payload;
+        state.isAuthenticated = true;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
+        state.isAuthenticated = false;
         state.authFlow = null;
         state.otpVerified = false;
       })
       .addCase(bootstrapSession.fulfilled, (state, action) => {
         state.user = action.payload;
+        state.isAuthenticated = true;
         state.initialized = true;
       })
       .addCase(bootstrapSession.rejected, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
         state.initialized = true;
       })
       .addCase(sendOtp.pending, (state) => {

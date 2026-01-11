@@ -69,7 +69,6 @@ export function ChatConversation() {
       </div>
     );
   }
-  console.log('Conversation Data:', conversation);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">

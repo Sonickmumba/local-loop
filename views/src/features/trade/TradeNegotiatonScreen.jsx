@@ -10,12 +10,6 @@ export function TradeNegotiationScreen() {
   const location = useLocation();
 
   const { listingId, ownerId, listingTitle, ownerName } = location.state || {};
-  console.log('Trade Context:', {
-    listingId,
-    ownerId,
-    listingTitle,
-    ownerName,
-  });
 
   const [formData, setFormData] = useState({
     tradeDate: '',
