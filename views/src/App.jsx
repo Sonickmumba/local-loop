@@ -29,6 +29,12 @@ import { ChatList } from './features/chat/ChatList.jsx';
 
 import './App.css';
 import { NotificationsScreen } from './features/notification/NotificationsScreen.jsx';
+import { TradeNegotiationScreen } from './features/trade/TradeNegotiatonScreen.jsx';
+import { TradeManagementScreen } from './features/trade/TradeManagementScreen.jsx';
+// import { ReviewRatingScreen } from './features/review/reviewRatingScreen.jsx';
+import { ReviewRating } from './features/review/ReviewRating'; 
+
+
 
 function App() {
   const dispatch = useDispatch();
@@ -36,7 +42,7 @@ function App() {
 
   // Location permission and coordinates from Redux store
   const { coords } = useSelector((s) => s.location);
-
+  
   useEffect(() => {
     dispatch(bootstrapSession());
   }, [dispatch]);
@@ -126,6 +132,10 @@ function App() {
             </RequireAuth>
           }
         />
+        <Route path="/trade-negotiation" element={<TradeNegotiationScreen />} />
+        <Route path='/trade-management' element={<TradeManagementScreen />} />
+        <Route path='/review-rating' element={<ReviewRating/>} />
+        
       </Routes>
     </div>
     // </Router>

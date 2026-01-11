@@ -7,7 +7,7 @@ const reviewsController = require('../controllers/reviewsController');
 const router = express.Router();
 
 // - `POST /api/reviews` - Create review (protected)
-router.post('/reviews', authMiddleware, reviewsController.createReview);
+router.post('/', authMiddleware, reviewsController.createReview);
 
 // - `GET /api/reviews/user/:userId` - Get user's reviews
 router.get('/user/:userId', authMiddleware,reviewsController.getUserReviews);

@@ -14,7 +14,6 @@ import {
   markAllAsRead,
 } from './notificationsSlice';
 
-
 export const NotificationsScreen = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -40,6 +39,7 @@ export const NotificationsScreen = () => {
   useEffect(() => {
     dispatch(fetchNotifications());
   }, [dispatch]);
+
   const handleNotificationClick = async (notification) => {
     // Mark as read if not already read
     if (!notification.is_read) {
@@ -50,9 +50,10 @@ export const NotificationsScreen = () => {
     if (notification.type === 'message' && notification.reference_id) {
       navigate(`/chat-conversation?chatId=${notification.reference_id}`);
     } else if (notification.type === 'trade' && notification.reference_id) {
-      // navigate('/trade-management', { selectedTradeId: notification.reference_id });
-      // For now, just navigate to home
-      navigate('/home/feed');
+      navigate('/trade-management', { state: {
+        selectedTradeId: notification.reference_id},
+      });
+      
     } else if (notification.type === 'listing' && notification.reference_id) {
       navigate(`/listing-details/${notification.reference_id}`);
     } else {
@@ -76,7 +77,7 @@ export const NotificationsScreen = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
