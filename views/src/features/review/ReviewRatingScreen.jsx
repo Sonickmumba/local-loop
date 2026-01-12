@@ -77,7 +77,7 @@ export const  ReviewRating = () => {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="px-4 py-4 flex items-center gap-3">
           <button
-            onClick={() => navigate('trade-management')}
+            onClick={() => navigate('/trade-management')}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
