@@ -71,6 +71,8 @@ export const  ReviewRating = () => {
     );
   }
 
+  console.log(trade)
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
