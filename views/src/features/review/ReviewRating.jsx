@@ -32,7 +32,7 @@ export const ReviewRating = () => {
           revieweeId,
           rating,
           content: review,
-          tag,
+          tag: tag,
         }),
       });
 
