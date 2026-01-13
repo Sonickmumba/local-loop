@@ -21,6 +21,8 @@ export const TradeManagementScreen = () => {
   const tradeDataId = location.state?.selectedTradeId;
   const [trade, setTrade] = useState(null);
 
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const handleAccept = async () => {
     try {
       const res = await fetch(
@@ -50,6 +52,8 @@ export const TradeManagementScreen = () => {
   };
 
   const handleComplete = async () => {
+    if (isRequester) return;
+
     try {
       const res = await fetch(
         `http://localhost:3000/api/trades/${trade.id}/status`,
@@ -79,6 +83,41 @@ export const TradeManagementScreen = () => {
       // });
     } catch (err) {
       alert(err.message);
+    }
+  };
+
+  const handleDecline = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to decline this proposal?'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setIsUpdating(true);
+
+      const res = await fetch(
+        `http://localhost:3000/api/trades/${trade.id}/status`,
+        {
+          method: 'PATCH',
+          headers: { 'content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ status: 'cancelled' }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to decline trade');
+      }
+
+      setTrade(data.data);
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -279,11 +318,21 @@ export const TradeManagementScreen = () => {
             <>
               <button
                 onClick={handleAccept}
-                className="w-full bg-blue-600 text-white py-4 rounded-full hover:bg-blue-700 transition-colors"
+                disabled={isRequester}
+                className={`w-full py-4 rounded-full transition-colors ${
+                  isRequester
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+                // className="w-full bg-blue-600 text-white py-4 rounded-full hover:bg-blue-700 transition-colors"
               >
                 Accept Trade
               </button>
-              <button className="w-full bg-white border border-gray-300 text-gray-700 py-4 rounded-full hover:bg-gray-50 transition-colors">
+              <button
+                onClick={handleDecline}
+                disabled={isUpdating}
+                className="w-full bg-white border border-gray-300 text-gray-700 py-4 rounded-full hover:bg-gray-50 transition-colors"
+              >
                 Decline
               </button>
             </>
