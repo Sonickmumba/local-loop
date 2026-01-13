@@ -3,10 +3,6 @@ import { useState } from 'react';
 import { ArrowLeft, Star } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-// interface ReviewRatingScreenProps {
-//   navigate: (screen: Screen, state?: any) => void;
-// }
-
 export const  ReviewRating = () => {
   const navigate = useNavigate();
 
@@ -17,12 +13,6 @@ export const  ReviewRating = () => {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [review, setReview] = useState('');
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     alert('Thank you for your review!');
-//     navigate('home');
-//   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

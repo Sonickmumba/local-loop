@@ -48,7 +48,7 @@ export const bootstrapSession = createAsyncThunk(
       return res.data.data; // user object
     } catch (error) {
       console.error('Error bootstrapping session:', error);
-      return rejectWithValue(null);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );

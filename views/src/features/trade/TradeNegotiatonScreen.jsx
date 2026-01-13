@@ -9,7 +9,8 @@ export function TradeNegotiationScreen() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { listingId, ownerId, listingTitle, ownerName } = location.state || {};
+  const { chatId, listingId, ownerId, listingTitle, ownerName } = location.state || {};
+  console.log('chatid from tradenegations:', chatId)
 
   const [formData, setFormData] = useState({
     tradeDate: '',
@@ -30,6 +31,7 @@ export function TradeNegotiationScreen() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          chatId,
           listingId,
           ownerId,
           requesterOffer: formData.requesterOffer,
@@ -50,7 +52,7 @@ export function TradeNegotiationScreen() {
       }
 
       navigate('/trade-management', {
-        state: { selectedTradeId: data.trade.id },
+        state: { selectedTradeId: data.trade.id, chatId:chatId },
       });
     } catch (err) {
       console.error(err);

@@ -27,7 +27,7 @@ exports.createNotification = async (
 
 exports.getUserNotifications = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const { unreadOnly } = req.query;
 
     let query = `SELECT * FROM notifications WHERE user_id = $1`;
@@ -61,7 +61,7 @@ exports.getUserNotifications = async (req, res, next) => {
 // Get unread count
 exports.getUnreadCount = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     const { rows } = await pool.query(
       'SELECT COUNT(*)::int as count FROM notifications WHERE user_id = $1 AND is_read = false',
@@ -83,7 +83,7 @@ exports.getUnreadCount = async (req, res, next) => {
 exports.markAsRead = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     const { rowCount } = await pool.query(
       `UPDATE notifications SET is_read = true WHERE id = $1 AND user_id = $2`,
@@ -109,7 +109,7 @@ exports.markAsRead = async (req, res, next) => {
 // Mark all notifications as read
 exports.markAllAsRead = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     await pool.query(
       'UPDATE notifications SET is_read = TRUE WHERE user_id = $1 AND is_read = false',
@@ -129,7 +129,7 @@ exports.markAllAsRead = async (req, res, next) => {
 exports.deleteNotification = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     const { rowCount } = await pool.query(
       'DELETE FROM notifications WHERE id = $1 AND user_id = $2',

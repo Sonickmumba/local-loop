@@ -20,10 +20,10 @@ router.get('/:listingId/similar', listingsController.getSimilarListings);
 router.post('/', authMiddleware, listingsController.createListing);
 
 // `PUT /api/listings/:id` - Update listing (protected)
-router.put('/id', authMiddleware, listingsController.updateListing);
+router.put('/:id', authMiddleware, listingsController.updateListing);
 
 // `DELETE /api/listings/:id` - Delete listing (protected)
-router.delete('/id', authMiddleware, listingsController.deleteListing);
+router.delete('/:id', authMiddleware, listingsController.deleteListing);
 
 
 module.exports = router;

@@ -168,7 +168,7 @@ exports.createListing = async (req, res, next) => {
       image_url,
     } = req.body;
 
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     const listingId = generateId();
 
@@ -255,7 +255,7 @@ exports.updateListing = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { title, description, status, image_url } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     // verify if listing already exist and belongs to the user
 
@@ -329,7 +329,7 @@ exports.updateListing = async (req, res, next) => {
 exports.deleteListing = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     // verify if the lisiting to delete exists
     const listingToDeleteResult = await pool.query(
@@ -367,7 +367,7 @@ exports.getUserListings = async (req, res, next) => {
 
     // Resolve "me"
     if (userId === 'me') {
-      userId = req.user.userId;
+      userId = req.user.id;
     }
 
     const userListingsResult = await pool.query(

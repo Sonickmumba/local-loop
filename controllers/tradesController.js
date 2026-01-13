@@ -4,7 +4,7 @@ const { generateId } = require('../utils/helpers');
 // - Create trade proposal
 exports.createTrade = async (req, res, next) => {
   try {
-    const requesterId = req.user.userId;
+    const requesterId = req.user.id;
     const {
       listingId,
       ownerId,
@@ -124,7 +124,7 @@ exports.createTrade = async (req, res, next) => {
 
 exports.getTradeById = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const id = req.params.id;
     const tradeResult = await pool.query(
       `SELECT t.*, l.title AS listing_title, l.type AS listing_type, u1.name AS requester_name, u1.rating as requester_rating, u2.name AS owner_name, u2.rating as owner_rating FROM trades t JOIN listings l ON t.listing_id = l.id JOIN users u1 ON t.requester_id = u1.id JOIN users u2 ON t.owner_id = u2.id WHERE t.id = $1 AND (t.requester_id = $2 OR t.owner_id = $2)`,
@@ -149,7 +149,7 @@ exports.getTradeById = async (req, res, next) => {
 // Get user's trades
 exports.getUserTrades = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const { status } = req.query;
 
     let query = `
@@ -194,7 +194,7 @@ exports.updateTradeStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     // Validate status
     const allowedStatuses = ['pending', 'accepted', 'cancelled', 'completed'];

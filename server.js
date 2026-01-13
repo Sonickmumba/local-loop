@@ -8,6 +8,8 @@ const cors = require('cors');
 const errorHandler = require('./middleware/errorHandler');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const passport = require('passport');
+
 const securityHeaders = require('./middleware/securityHeaders');
 const { apiLimiter } = require('./middleware/rateLimiting');
 
@@ -37,7 +39,17 @@ app.set('io', io);
 
 // middleware here
 app.use(securityHeaders);
+
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    credentials: true,
+    exposedHeaders: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'Retry-After'],
+  })
+);
+
 app.use(apiLimiter);
+
 app.use(cookieParser());
 app.use(
   session({
@@ -51,12 +63,17 @@ app.use(
     },
   })
 );
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-    credentials: true,
-  })
-);
+
+// 🔐 Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// app.use(
+//   cors({
+//     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+//     credentials: true,
+//   })
+// );
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

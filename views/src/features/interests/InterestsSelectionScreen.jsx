@@ -45,7 +45,7 @@ export const InterestsSelectionScreen = () => {
               key={interest.id}
               onClick={() => toggleInterest(interest.id)}
               className={`p-4 rounded-xl border-2 transition-all ${
-                selected.includes(interest.id)
+                selected?.includes(interest.id)
                   ? 'border-blue-600 bg-blue-50'
                   : 'border-gray-300 bg-white hover:border-gray-400'
               }`}
@@ -60,14 +60,14 @@ export const InterestsSelectionScreen = () => {
       <div className="w-full max-w-2xl mx-auto">
         <button
           onClick={() => navigate('/auth/signin')}
-          disabled={selected.length < 3}
+          disabled={selected?.length < 3}
           className={`w-full py-4 rounded-full transition-colors ${
-            selected.length >= 3
+            selected?.length >= 3
               ? 'bg-blue-600 text-white hover:bg-blue-700'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
-          Continue {selected.length > 0 && `(${selected.length} selected)`}
+          Continue {selected?.length > 0 && `(${selected?.length} selected)`}
         </button>
       </div>
     </div>
