@@ -14,8 +14,8 @@ const router = express.Router();
 // register user
 router.post(
   '/register',
-  authLimiter,
-  authSpeedLimiter,
+  // authLimiter,
+  // authSpeedLimiter,
   [
     body('name').trim().notEmpty().withMessage('Name is required'),
     body('email').isEmail().withMessage('Valid email is required'),
@@ -35,7 +35,7 @@ router.post(
 router.post(
   '/login',
   // authLimiter,
-  authSpeedLimiter,
+  // authSpeedLimiter,
   [
     body('email').isEmail().withMessage('Valid email is required'),
     body('password').notEmpty().withMessage('Password is required'),
@@ -53,7 +53,7 @@ router.post('/logout', authController.logout);
 
 router.post(
   '/request-password-reset',
-  authLimiter,
+  // authLimiter,
   [body('email').isEmail().withMessage('Valid email is required')],
   authController.requestPasswordReset
 );
