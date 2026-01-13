@@ -15,12 +15,8 @@ export const ReviewRating = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [hoveredRating, setHoveredRating] = useState(0);
-  // const [review, setReview] = useState('');
-  const [tag, setTag] = useState('');
-
-  /**
-   * Fetch authoritative trade data
-   */
+  const [tags, setTags] = useState([]);
+  
   useEffect(() => {
     if (!tradeId || !revieweeId) {
       setError('Invalid review request');
@@ -85,7 +81,7 @@ export const ReviewRating = () => {
           revieweeId,
           rating,
           content,
-          tag,
+          tags,
         }),
       });
 
@@ -104,8 +100,7 @@ export const ReviewRating = () => {
       setSubmitting(false);
     }
   };
-
-  //  * Loading / error states
+  
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-500">
@@ -225,7 +220,7 @@ export const ReviewRating = () => {
                 <button
                   key={tag}
                   type="button"
-                  onClick={() => setTag(tag)}
+                  onClick={() => setTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag])}
                   className="px-4 py-2 bg-gray-100 hover:bg-blue-100 hover:text-blue-600 rounded-full text-sm transition-colors"
                 >
                   {tag}
