@@ -18,7 +18,6 @@ export function ChatConversation() {
 
   const searchParams = new URLSearchParams(location.search);
   const chatId = searchParams.get('chatId');
-  console.log('chatIdFrom conversation:', chatId)
 
   const {
     conversation,
