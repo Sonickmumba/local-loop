@@ -34,7 +34,6 @@ const io = new Server(server, {
   },
 });
 
-// Make io available to routes if needed
 app.set('io', io);
 
 // middleware here
@@ -68,16 +67,8 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// app.use(
-//   cors({
-//     origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-//     credentials: true,
-//   })
-// );
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// app.use(bodyParser.urlencoded({ extended: true }));
 
 // Request logging out so that one knows the url
 app.use((req, res, next) => {
@@ -96,7 +87,7 @@ app.get('/health', (req, res) => {
 
 app.get('/', (req, res) => {
   res.json({
-    info: 'Node.js, Express, and Postgres API Template by Sonick Mumba',
+    info: 'Localloop App by Sonick Mumba',
   });
 });
 
