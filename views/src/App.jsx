@@ -33,6 +33,7 @@ import { TradeNegotiationScreen } from './features/trade/TradeNegotiatonScreen.j
 import { TradeManagementScreen } from './features/trade/TradeManagementScreen.jsx';
 // import { ReviewRatingScreen } from './features/review/reviewRatingScreen.jsx';
 import { ReviewRating } from './features/review/ReviewRating';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const dispatch = useDispatch();
@@ -48,97 +49,98 @@ function App() {
   if (!initialized) return <div>Loading...</div>;
 
   return (
-    // <Router>
-    <div className="min-h-screen bg-white">
-      <Routes>
-        <Route path="/" element={<Navigate to="/welcome" replace />} />
-        <Route path="/welcome" element={<WelcomeScreen />} />
-        <Route path="/location" element={<LocationPermissionScreen />} />
-        <Route
-          path="/interests"
-          element={<InterestsSelectionScreen />}
-        />
+    <>
+      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+      <div className="min-h-screen bg-white">
+        <Routes>
+          <Route path="/" element={<Navigate to="/welcome" replace />} />
+          <Route path="/welcome" element={<WelcomeScreen />} />
+          <Route path="/location" element={<LocationPermissionScreen />} />
+          <Route path="/interests" element={<InterestsSelectionScreen />} />
 
-        <Route path="/auth" element={<LoginLayout />}>
-          <Route index element={<Navigate to="signup" replace />} />
-          <Route path="signup" element={<SignupScreen coords={coords} />} />
-          <Route path="signin" element={<SigninScreen />} />
-        </Route>
+          <Route path="/auth" element={<LoginLayout />}>
+            <Route index element={<Navigate to="signup" replace />} />
+            <Route path="signup" element={<SignupScreen coords={coords} />} />
+            <Route path="signin" element={<SigninScreen />} />
+          </Route>
 
-        <Route path="/phone" element={<PhoneVerificationScreen />} />
-        {/* Protected routes */}
-        <Route
-          path="/home/feed"
-          element={
-            <RequireAuth>
-              <HomeFeedScreen />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/create-listing"
-          element={
-            <RequireAuth>
-              <CreateListing />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/listing-details/:listingId"
-          element={
-            <RequireAuth>
-              <ListingDetails />
-            </RequireAuth>
-          }
-        />
-        <Route path="/user-profile/:userId" element={<UserProfile />} />
-        <Route
-          path="/home/feed/search"
-          element={
-            <RequireAuth>
-              <HomeSearchScreen />
-            </RequireAuth>
-          }
-        />
-        {/* user setting */}
-        <Route
-          path="user-profile/me/settings"
-          element={
-            <RequireAuth>
-              <UserSettings />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/chat-conversation"
-          element={
-            <RequireAuth>
-              <ChatConversation />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/chat-list"
-          element={
-            <RequireAuth>
-              <ChatList />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/notifications"
-          element={
-            <RequireAuth>
-              <NotificationsScreen />
-            </RequireAuth>
-          }
-        />
-        <Route path="/trade-negotiation" element={<TradeNegotiationScreen />} />
-        <Route path="/trade-management" element={<TradeManagementScreen />} />
-        <Route path="/review-rating" element={<ReviewRating />} />
-      </Routes>
-    </div>
-    // </Router>
+          <Route path="/phone" element={<PhoneVerificationScreen />} />
+          {/* Protected routes */}
+          <Route
+            path="/home/feed"
+            element={
+              <RequireAuth>
+                <HomeFeedScreen />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/create-listing"
+            element={
+              <RequireAuth>
+                <CreateListing />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/listing-details/:listingId"
+            element={
+              <RequireAuth>
+                <ListingDetails />
+              </RequireAuth>
+            }
+          />
+          <Route path="/user-profile/:userId" element={<UserProfile />} />
+          <Route
+            path="/home/feed/search"
+            element={
+              <RequireAuth>
+                <HomeSearchScreen />
+              </RequireAuth>
+            }
+          />
+          {/* user setting */}
+          <Route
+            path="user-profile/me/settings"
+            element={
+              <RequireAuth>
+                <UserSettings />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/chat-conversation"
+            element={
+              <RequireAuth>
+                <ChatConversation />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/chat-list"
+            element={
+              <RequireAuth>
+                <ChatList />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <RequireAuth>
+                <NotificationsScreen />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/trade-negotiation"
+            element={<TradeNegotiationScreen />}
+          />
+          <Route path="/trade-management" element={<TradeManagementScreen />} />
+          <Route path="/review-rating" element={<ReviewRating />} />
+        </Routes>
+      </div>
+    </>
   );
 }
 
