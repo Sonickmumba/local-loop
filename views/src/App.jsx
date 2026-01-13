@@ -50,7 +50,7 @@ function App() {
 
   return (
     <>
-      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+      <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
       <div className="min-h-screen bg-white">
         <Routes>
           <Route path="/" element={<Navigate to="/welcome" replace />} />
