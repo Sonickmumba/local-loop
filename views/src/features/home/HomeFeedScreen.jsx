@@ -24,8 +24,6 @@ export function HomeFeedScreen() {
   const user = useSelector((s) => s.auth.user);
   const [activeTab, setActiveTab] = useState('all');
 
-  // const { isAuthenticated } = useAuth();
-
   const filteredListings = listings.filter((listing) => {
     if (activeTab === 'all') return true;
     if (activeTab === 'offers') return listing.type === 'offer';
