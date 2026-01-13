@@ -16,7 +16,7 @@ export const ReviewRating = () => {
   const [error, setError] = useState(null);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [tags, setTags] = useState([]);
-  
+
   useEffect(() => {
     if (!tradeId || !revieweeId) {
       setError('Invalid review request');
@@ -100,7 +100,7 @@ export const ReviewRating = () => {
       setSubmitting(false);
     }
   };
-  
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-500">
@@ -216,23 +216,37 @@ export const ReviewRating = () => {
                 'On time',
                 'Great communication',
                 'Helpful',
-              ].map((tag) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => setTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag])}
-                  className="px-4 py-2 bg-gray-100 hover:bg-blue-100 hover:text-blue-600 rounded-full text-sm transition-colors"
-                >
-                  {tag}
-                </button>
-              ))}
+              ].map((tag) => {
+                const selectedTag = tags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() =>
+                      setTags((prev) =>
+                        prev.includes(tag)
+                          ? prev.filter((t) => t !== tag)
+                          : [...prev, tag]
+                      )
+                    }
+                    // className="px-4 py-2 bg-gray-100 hover:bg-blue-100 hover:text-blue-600 rounded-full text-sm transition-colors"
+                    className={`px-4 py-2 rounded-full text-sm transition-colors ${
+                      selectedTag
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 hover:bg-blue-100 hover:text-blue-600'
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Submit */}
           <button
             type="submit"
-            disabled={rating === 0 || content.trim() === '' }
+            disabled={rating === 0 || content.trim() === ''}
             className={`w-full py-4 rounded-full transition-colors ${
               rating > 0 && content.trim()
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
