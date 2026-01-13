@@ -111,7 +111,10 @@ export const TradeManagementScreen = () => {
   const revieweeId = isRequester ? trade.owner_id : trade.requester_id;
 
   const partnerName = isRequester ? trade.owner_name : trade.requester_name;
- 
+  const partnerRating = isRequester
+    ? trade.owner_rating
+    : trade.requester_rating;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -178,21 +181,30 @@ export const TradeManagementScreen = () => {
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
           <div className="text-sm text-gray-600 mb-3">Trading with</div>
           <button
-            onClick={() =>
-              navigate('user-profile', { selectedUserId: trade.partnerId })
-            }
+            // onClick={() =>
+            //   navigate('/user-profile', { selectedUserId: trade.partnerId })
+            // }
+
+            onClick={() => {
+              const partnerId = isRequester
+                ? trade.owner_id
+                : trade.requester_id;
+              navigate('/user-profile', {
+                state: { selectedUserId: partnerId },
+              });
+            }}
             className="flex items-center gap-3 w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
-              {trade.requester_name
+              {partnerName
                 ?.split(' ')
                 .map((n) => n[0])
                 .join('')}
             </div>
             <div className="flex-1 text-left">
-              <div className="mb-1">{trade.requester_name}</div>
+              <div className="mb-1">{partnerName}</div>
               <div className="text-sm text-gray-600">
-                ⭐ {trade.requester_rating} • 23 trades
+                ⭐ {partnerRating} • 23 trades
               </div>
             </div>
           </button>
@@ -286,14 +298,9 @@ export const TradeManagementScreen = () => {
                 Mark as Completed
               </button>
               <button
-                // onClick={() =>
-                //   navigate('/chat-conversation', {
-                //     state: { selectedChatId: trade.id },
-                //   })
-                // }
-
-
-                onClick={() => navigate(`/chat-conversation?chatId=${trade.id}`)}
+                onClick={() =>
+                  navigate(`/chat-conversation?chatId=${trade.id}`)
+                }
                 className="w-full bg-white border border-blue-600 text-blue-600 py-4 rounded-full hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
               >
                 <MessageSquare className="w-5 h-5" />
@@ -323,4 +330,4 @@ export const TradeManagementScreen = () => {
       </div>
     </div>
   );
-}
+};

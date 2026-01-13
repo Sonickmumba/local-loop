@@ -82,7 +82,7 @@ export const UserSettings = () => {
         <button
           onClick={() => {
             dispatch(logoutUser());
-            navigate('/welcome');
+            navigate('/auth/signin');
           }}
           className="w-full bg-white border border-red-300 text-red-600 py-4 rounded-xl hover:bg-red-50 transition-colors flex items-center justify-center gap-2"
         >

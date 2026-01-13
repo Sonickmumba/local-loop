@@ -58,7 +58,7 @@ export const UserProfile = () => {
       try {
         const res = await fetch(
           `http://localhost:3000/api/listings/user/${userId}`,
-          { credentials: 'include' }
+          { credentials: 'include', headers: {'content-type': 'application/json',}  }
         );
 
         if (res.status === 401) {

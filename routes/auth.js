@@ -1,16 +1,21 @@
 const express = require('express');
 const { body } = require('express-validator');
-const authMiddleware = require('../middleware/auth');
+const ensureAuth = require('../middleware/auth');
 const authController = require('../controllers/authController');
 const { authLimiter, authSpeedLimiter } = require('../middleware/rateLimiting');
+const passport = require('passport');
+require('../config/passport');
+
+// const ensureAuth = require('../middleware/auth')
+
 
 const router = express.Router();
 
 // register user
 router.post(
   '/register',
-  authLimiter,
-  authSpeedLimiter,
+  // authLimiter,
+  // authSpeedLimiter,
   [
     body('name').trim().notEmpty().withMessage('Name is required'),
     body('email').isEmail().withMessage('Valid email is required'),
@@ -29,25 +34,26 @@ router.post(
 // user login
 router.post(
   '/login',
-  authLimiter,
-  authSpeedLimiter,
+  // authLimiter,
+  // authSpeedLimiter,
   [
     body('email').isEmail().withMessage('Valid email is required'),
     body('password').notEmpty().withMessage('Password is required'),
   ],
+  passport.authenticate('local'),
   authController.login
 );
 
-router.get('/user/:userId', authMiddleware, authController.getUserById);
+router.get('/user/:id', ensureAuth, authController.getUserById);
 
 // get currrent user
-router.get('/me', authMiddleware, authController.getCurrentUser);
+router.get('/me', ensureAuth, authController.getCurrentUser);
 
 router.post('/logout', authController.logout);
 
 router.post(
   '/request-password-reset',
-  authLimiter,
+  // authLimiter,
   [body('email').isEmail().withMessage('Valid email is required')],
   authController.requestPasswordReset
 );

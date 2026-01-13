@@ -4,7 +4,7 @@ const { generateId, timeAgo } = require('../utils/helpers');
 // Get user's conversations
 exports.getUserConversations = async (req, res, next) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     const result = await pool.query(
       `
@@ -70,7 +70,7 @@ exports.getUserConversations = async (req, res, next) => {
 exports.getOrCreateConversation = async (req, res, next) => {
   try {
     const { listingId, participantId } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     if (userId === participantId) {
       return res.status(400).json({
@@ -122,7 +122,8 @@ exports.getOrCreateConversation = async (req, res, next) => {
 exports.getMessages = async (req, res, next) => {
   try {
     const { chatId } = req.params;
-    const userId = req.user.userId;
+    console.log(chatId)
+    const userId = req.user.id;
 
     // check if user is part of the conversation
     const conversationResult = await pool.query(
@@ -166,7 +167,7 @@ exports.getMessages = async (req, res, next) => {
 exports.sendMessage = async (req, res, next) => {
   try {
     const { conversationId, content } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.id;
     const io = req.app.get('io');
 
     // check if user is part of the conversation
@@ -254,7 +255,7 @@ exports.sendMessage = async (req, res, next) => {
 
 exports.getConversationById = async (req, res, next) => {
   const { conversationId } = req.params;
-  const userId = req.user.userId;
+  const userId = req.user.id;
 
   try {
     const { rows } = await pool.query(

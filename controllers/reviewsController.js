@@ -5,7 +5,7 @@ exports.createReview = async (req, res, next) => {
   const client = await pool.connect();
 
   try {
-    const reviewerId = req.user.userId;
+    const reviewerId = req.user.id;
     const { tradeId, revieweeId, rating, content, tags } = req.body;
 
     /* -----------------------------
@@ -158,7 +158,7 @@ exports.getUserReviews = async (req, res, next) => {
     let userId  = req.params.userId;
 
     if (userId === 'me') {
-      userId = req.user.userId;
+      userId = req.user.id;
     }
 
     const reviewsResult = await pool.query(

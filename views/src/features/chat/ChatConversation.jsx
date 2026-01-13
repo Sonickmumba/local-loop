@@ -18,6 +18,7 @@ export function ChatConversation() {
 
   const searchParams = new URLSearchParams(location.search);
   const chatId = searchParams.get('chatId');
+  console.log('chatIdFrom conversation:', chatId)
 
   const {
     conversation,
@@ -86,6 +87,7 @@ export function ChatConversation() {
           onClick={() =>
             navigate('/trade-negotiation', {
               state: {
+                chatId: chatId,
                 listingId: conversation.listing.id,
                 ownerId: contact.id,
                 listingTitle: conversation.listing.title,

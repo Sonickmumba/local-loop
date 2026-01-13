@@ -53,19 +53,31 @@ exports.register = async (req, res, next) => {
       );
     }
 
-    // Set user session
-    req.session.userId = userId;
-    req.session.email = email;
+    req.login({ id: userId, email, name }, (err) => {
+      if (err) {
+        return next(err);
+      }
 
-    res.status(201).json({
-      success: true,
-      message: 'User registered successfully',
-      data: {
-        id: userId,
-        name,
-        email,
-      },
+      res.status(201).json({
+        success: true,
+        message: 'User registered successfully',
+        data: {
+          id: userId,
+          name,
+          email,
+        },
+      });
     });
+
+    // res.status(201).json({
+    //   success: true,
+    //   message: 'User registered successfully',
+    //   data: {
+    //     id: userId,
+    //     name,
+    //     email,
+    //   },
+    // });
   } catch (error) {
     console.error(error);
     res.status(500).send('Error registering user.');
@@ -73,68 +85,79 @@ exports.register = async (req, res, next) => {
 };
 
 // Login user
-exports.login = async (req, res, next) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array(),
-      });
-    }
+// exports.login = async (req, res, next) => {
+//   try {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//       return res.status(400).json({
+//         success: false,
+//         errors: errors.array(),
+//       });
+//     }
 
-    const { email, password } = req.body;
+//     const { email, password } = req.body;
 
-    // Find user
-    const result = await pool.query(
-      'SELECT id, name, email, password_hash FROM users WHERE email = $1',
-      [email]
-    );
+//     // Find user
+//     const result = await pool.query(
+//       'SELECT id, name, email, password_hash FROM users WHERE email = $1',
+//       [email]
+//     );
 
-    if (result.rowCount === 0) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-      });
-    }
+//     if (result.rowCount === 0) {
+//       return res.status(401).json({
+//         success: false,
+//         message: 'Invalid email or password',
+//       });
+//     }
 
-    const user = result.rows[0];
+//     const user = result.rows[0];
 
-    // Check password
-    const isValidPassword = await bcrypt.compare(password, user.password_hash);
-    if (!isValidPassword) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-      });
-    }
+//     // Check password
+//     const isValidPassword = await bcrypt.compare(password, user.password_hash);
+//     if (!isValidPassword) {
+//       return res.status(401).json({
+//         success: false,
+//         message: 'Invalid email or password',
+//       });
+//     }
 
-    // Set user session
-    req.session.userId = user.id;
-    req.session.email = user.email;
+//     // Set user session
+//     req.session.userId = user.id;
+//     req.session.email = user.email;
 
-    res.json({
-      success: true,
-      message: 'Login successful',
-      data: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
+//     res.json({
+//       success: true,
+//       message: 'Login successful',
+//       data: {
+//         id: user.id,
+//         name: user.name,
+//         email: user.email,
+//       },
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+
+exports.login = (req, res, next) => {
+  res.json({
+    success: true,
+    message: 'Login successful',
+    data: req.user,
+  });
 };
+
+
 
 // Get user by ID
 exports.getUserById = async (req, res, next) => {
   try {
-    let userId = req.params.userId;
+    let userId = req.params.id;
 
     // Handle /user/me
     if (userId === 'me') {
-      userId = req.user.userId;
+      userId = req.user.id;
     }
 
     // Fetch user
@@ -184,7 +207,7 @@ exports.getCurrentUser = async (req, res, next) => {
               profile_image_url, rating, total_ratings, completed_trades, created_at
        FROM users
        WHERE id = $1`,
-      [req.user.userId]
+      [req.user.id]
     );
 
     if (userResult.rowCount === 0) {
@@ -202,7 +225,7 @@ exports.getCurrentUser = async (req, res, next) => {
        FROM interests i
        JOIN user_interests ui ON i.id = ui.interest_id
        WHERE ui.user_id = $1`,
-      [req.user.userId]
+      [req.user.id]
     );
 
     user.interests = interestsResult.rows;
