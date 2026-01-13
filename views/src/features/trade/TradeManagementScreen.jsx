@@ -1,4 +1,3 @@
-// import { Screen } from '../App';
 import {
   ArrowLeft,
   Calendar,
@@ -12,6 +11,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { formatTradeDate } from '../util/date';
 import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
+
 
 export const TradeManagementScreen = () => {
   const currentUserId = useSelector((state) => state.auth.user.id);
@@ -24,6 +25,10 @@ export const TradeManagementScreen = () => {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleAccept = async () => {
+    if (isRequester) return;
+
+    const toastId = toast.loading('Accepting trade...');
+
     try {
       const res = await fetch(
         `http://localhost:3000/api/trades/${trade.id}/status`,
@@ -45,14 +50,16 @@ export const TradeManagementScreen = () => {
 
       // update UI immediately
       setTrade(data.data);
+      toast.success('Trade accepted!', { id: toastId });
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      toast.error(err.message, { id: toastId });
     }
   };
 
   const handleComplete = async () => {
-    if (isRequester) return;
+
+    const toastId = toast.loading('Completing trade...');
 
     try {
       const res = await fetch(
@@ -68,21 +75,16 @@ export const TradeManagementScreen = () => {
       );
 
       const data = await res.json();
+      toast.success('Trade marked as completed!', { id: toastId });
 
       if (!res.ok) {
         throw new Error(data.message || 'Failed to complete trade');
       }
-
-      // Update UI immediately
+      
       setTrade(data.data);
-
-      // Optional: move to review screen
-
-      // navigate('/review-rating', {
-      //   state: { tradeId: trade.id },
-      // });
+      
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message, { id: toastId });
     }
   };
 
@@ -92,6 +94,8 @@ export const TradeManagementScreen = () => {
     );
 
     if (!confirmed) return;
+
+    const toastId = toast.loading('Declining trade...');
 
     try {
       setIsUpdating(true);
@@ -113,9 +117,10 @@ export const TradeManagementScreen = () => {
       }
 
       setTrade(data.data);
+      toast.success('Trade declined', { id: toastId });
     } catch (error) {
       console.error(error);
-      alert(error.message);
+      toast.error(error.message, { id: toastId });
     } finally {
       setIsUpdating(false);
     }
@@ -153,7 +158,7 @@ export const TradeManagementScreen = () => {
   const partnerRating = isRequester
     ? trade.owner_rating
     : trade.requester_rating;
-
+    
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -220,17 +225,11 @@ export const TradeManagementScreen = () => {
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
           <div className="text-sm text-gray-600 mb-3">Trading with</div>
           <button
-            // onClick={() =>
-            //   navigate('/user-profile', { selectedUserId: trade.partnerId })
-            // }
-
             onClick={() => {
               const partnerId = isRequester
                 ? trade.owner_id
                 : trade.requester_id;
-              navigate('/user-profile', {
-                state: { selectedUserId: partnerId },
-              });
+              navigate(`/user-profile/${partnerId}`)
             }}
             className="flex items-center gap-3 w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
           >
