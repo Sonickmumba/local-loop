@@ -10,7 +10,6 @@ export function TradeNegotiationScreen() {
   const location = useLocation();
 
   const { chatId, listingId, ownerId, listingTitle, ownerName } = location.state || {};
-  console.log('chatid from tradenegations:', chatId)
 
   const [formData, setFormData] = useState({
     tradeDate: '',
