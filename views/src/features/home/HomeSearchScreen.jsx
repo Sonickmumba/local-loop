@@ -53,7 +53,7 @@ export const HomeSearchScreen = () => {
     };
 
     fetchListings();
-  }, [debouncedQuery, typeFilter, categoryFilter]);
+  }, [debouncedQuery, typeFilter, categoryFilter, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-50">
