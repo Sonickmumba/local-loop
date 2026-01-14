@@ -28,8 +28,6 @@ export const CreateListing = () => {
     const result = await dispatch(createListing(formData));
 
     if (createListing.fulfilled.match(result)) {
-      // await dispatch(fetchHomeFeed()).unwrap();
-      // await refetch();
       navigate('/home/feed');
     }
   };
