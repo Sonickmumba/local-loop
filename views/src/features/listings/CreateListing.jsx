@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { createListing } from './listingsSlice';
 // import { fetchHomeFeed } from '../home/homeFeedSlice';
-import { useHomeFeed } from '../../hooks/useHomeFeed';
+// import { useHomeFeed } from '../../hooks/useHomeFeed';
 
 export const CreateListing = () => {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ export const CreateListing = () => {
 
   const creating = useSelector((s) => s.listings.creating);
 
-  const { refetch } = useHomeFeed();
+  // const { refetch } = useHomeFeed();
 
 
   const [formData, setFormData] = useState({
@@ -29,7 +29,7 @@ export const CreateListing = () => {
 
     if (createListing.fulfilled.match(result)) {
       // await dispatch(fetchHomeFeed()).unwrap();
-      await refetch();
+      // await refetch();
       navigate('/home/feed');
     }
   };
