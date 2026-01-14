@@ -399,7 +399,7 @@ exports.getSimilarListings = async (req, res, next) => {
   try {
     const { listingId } = req.params;
 
-    // 1. Get reference listing WITH neighborhood
+    // Get reference listing WITH neighborhood
     const referenceResult = await pool.query(
       `
       SELECT 
