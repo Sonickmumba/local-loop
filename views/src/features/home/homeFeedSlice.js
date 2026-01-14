@@ -1,14 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { createListing } from '../listings/listingsSlice';
 
 export const fetchHomeFeed = createAsyncThunk(
   'homeFeed/fetchHomeFeed',
-  async (_, { rejectWithValue, dispatch }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const res = await axios.get('http://localhost:3000/api/listings/', {
         withCredentials: true,
       });
-      return res.data.data; // array of listings
+      return res.data.data;
     } catch (err) {
       if (err.response?.status === 401) {
         // Redirect to login will be handled by RequireAuth
@@ -27,7 +28,16 @@ const homeFeedSlice = createSlice({
     status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
   },
-  reducers: {},
+  reducers: {
+    addListingRealtime: (state, action) => {
+      const exists = state.listings.some(
+        (l) => l.id === action.payload.id
+      );
+      if (!exists) {
+        state.listings.unshift(action.payload);
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchHomeFeed.pending, (state) => {
@@ -41,8 +51,11 @@ const homeFeedSlice = createSlice({
       .addCase(fetchHomeFeed.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
+      })
+      .addCase(createListing.fulfilled, (state, action) => {
+        state.listings.unshift(action.payload);
       });
   },
 });
-
+export const { addListingRealtime } = homeFeedSlice.actions;
 export default homeFeedSlice.reducer;
