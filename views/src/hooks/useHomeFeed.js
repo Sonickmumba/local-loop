@@ -7,8 +7,10 @@ export const useHomeFeed = () => {
   const { listings, status, error } = useSelector((s) => s.homeFeed);
 
   useEffect(() => {
-    dispatch(fetchHomeFeed());
-  }, [dispatch]);
+    if (status === 'idle') {
+      dispatch(fetchHomeFeed());
+    }
+  }, [status, dispatch]);
 
-  return { listings, status, error, refetch: () => dispatch(fetchHomeFeed()) };
+  return { listings, status, error };
 };
