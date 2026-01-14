@@ -215,6 +215,10 @@ exports.createListing = async (req, res, next) => {
     // Set default distance for newly created listings (assume nearby)
     listing.distance = 0;
 
+    // 🔴 EMIT REAL-TIME EVENT
+    const io = req.app.get('io');
+    io.emit('listing:new', listing);
+
     // Create notifications for users in the same neighborhood
     try {
       const nearbyUsersResult = await pool.query(
