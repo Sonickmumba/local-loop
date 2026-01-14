@@ -4,7 +4,7 @@ const SOCKET_SERVER_URL = 'http://localhost:3000';
 
 const socket = io(SOCKET_SERVER_URL, {
   withCredentials: true,
-  autoConnect: true, // VERY IMPORTANT
+  autoConnect: true,
 });
 
 export default socket;
