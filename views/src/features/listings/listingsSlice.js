@@ -10,7 +10,8 @@ export const createListing = createAsyncThunk(
         listingData,
         { withCredentials: true } // cookie-based auth
       );
-      return res.data;
+      console.log(res.data.data)
+      return res.data.data;
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || 'Failed to create listing'
