@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Home,
   Search,
@@ -10,15 +10,18 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { useHomeFeed } from '../../hooks/useHomeFeed';
 import { ListingCard } from '../../components/ListingCard';
 import { FilterTabs } from '../../components/FilterTabs';
+import { addListingRealtime } from './homeFeedSlice';
+import socket from '../util/socket';
 // import { useAuth } from '../../hooks/useAuth';
 
 export function HomeFeedScreen() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const location = useLocation();
   const { listings, status, error } = useHomeFeed();
   const user = useSelector((s) => s.auth.user);
@@ -30,6 +33,19 @@ export function HomeFeedScreen() {
     if (activeTab === 'needs') return listing.type === 'need';
     return true;
   });
+
+  // 🔴 REAL-TIME SUBSCRIPTION
+  useEffect(() => {
+    const handler = (listing) => {
+      dispatch(addListingRealtime(listing));
+    };
+
+    socket.on('listing:new', handler);
+
+    return () => {
+      socket.off('listing:new', handler);
+    };
+  }, [dispatch]);
 
   if (status === 'loading') {
     return (
