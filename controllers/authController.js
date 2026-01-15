@@ -7,9 +7,12 @@ const { generateId } = require('../utils/helpers');
 
 // register user
 exports.register = async (req, res, next) => {
+  console.log('REGISTER BODY:', req.body);
+
   try {
     const errors = validationResult(req);
-    if (!errors.isEmpty) {
+    if (!errors.isEmpty()) {
+      console.log('VALIDATION ERRORS:', errors.array());
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
@@ -17,7 +20,7 @@ exports.register = async (req, res, next) => {
 
     // check if the user already exists
     const existingUsers = await pool.query(
-      `SELECT FROM users WHERE email = $1 OR phone = $2`,
+      `SELECT 1 FROM users WHERE email = $1 OR phone = $2`,
       [email, phone]
     );
 
@@ -42,14 +45,21 @@ exports.register = async (req, res, next) => {
 
     // Add user interests if provided
     if (interests && interests.length > 0) {
+
       const interestValues = interests.map((interestId) => [
         userId,
         interestId,
       ]);
-      console.log(interestValues);
+
       await pool.query(
         `INSERT INTO user_interests (user_id, interest_id) VALUES ($1)`,
         [interestValues]
+      );
+
+      await pool.query(
+        `INSERT INTO user_interests (user_id, interest_id)
+     VALUES ${placeholders.join(', ')}`,
+        values
       );
     }
 
@@ -139,7 +149,6 @@ exports.register = async (req, res, next) => {
 //   }
 // };
 
-
 exports.login = (req, res, next) => {
   res.json({
     success: true,
@@ -147,8 +156,6 @@ exports.login = (req, res, next) => {
     data: req.user,
   });
 };
-
-
 
 // Get user by ID
 exports.getUserById = async (req, res, next) => {
