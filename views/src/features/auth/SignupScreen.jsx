@@ -19,19 +19,21 @@ export const SignupScreen = ({ coords }) => {
     e.preventDefault();
 
     dispatch(startSignup());
-    
+
     const result = await dispatch(
       signupUser({
         ...formData,
-        latitude: coords?.latitude,
-        longitude: coords?.longitude,
+        latitude: coords?.latitude ?? null,
+        longitude: coords?.longitude ?? null,
+        // interests: Array.isArray(selected) ? selected : [],
       })
     );
+    console.log(result);
 
     if (signupUser.fulfilled.match(result)) {
       dispatch(resetFormData());
       navigate('/phone');
-    } 
+    }
   };
 
   return (
