@@ -5,7 +5,7 @@ const generateId = () => uuidv4();
 
 // Calculate distance between two coordinates (Haversine formula)
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
-  const R = 3959; // Earth's radius in miles
+  const R = 6371; // Earth's radius in km
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
   const a =
