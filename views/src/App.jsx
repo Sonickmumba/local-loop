@@ -41,6 +41,7 @@ function App() {
 
   // Location permission and coordinates from Redux store
   const { coords } = useSelector((s) => s.location);
+  console.log(coords)
 
   useEffect(() => {
     dispatch(bootstrapSession());
