@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 export const ListingCard = ({ listing }) => {
   const navigate = useNavigate();
+  console.log(listing)
 
   return (
     <div
@@ -41,9 +42,9 @@ export const ListingCard = ({ listing }) => {
               .join('')}
           </div>
           <div>
-            <div className="text-sm">{listing.author}</div>
+            <div className="text-sm">{listing.author_name}</div>
             <div className="text-xs text-gray-500">
-              {listing.neighborhood} • {listing.distance} •{' '}
+              {listing.neighborhood} • {listing.distance} km •{' '}
               {listing.timeAgo}
             </div>
           </div>
