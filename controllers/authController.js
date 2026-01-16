@@ -16,7 +16,23 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { name, email, password, phone, neighborhood, interests } = req.body;
+    const {
+      name,
+      email,
+      password,
+      phone,
+      neighborhood,
+      interests,
+      location_lat,
+      location_lng,
+    } = req.body;
+
+    if ((location_lat && !location_lng) || (!location_lat && location_lng)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Both latitude and longitude must be provided',
+      });
+    }
 
     // check if the user already exists
     const existingUsers = await pool.query(
@@ -39,26 +55,28 @@ exports.register = async (req, res, next) => {
     // create user in the database
     const userId = generateId();
     await pool.query(
-      `INSERT INTO users (id, name, email, password_hash, phone, neighborhood) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [userId, name, email, passwordHash, phone, neighborhood]
+      `INSERT INTO users (id, name, email, password_hash, phone, neighborhood, location_lat,
+  location_lng) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [
+        userId,
+        name,
+        email,
+        passwordHash,
+        phone,
+        neighborhood,
+        location_lat ?? null,
+        location_lng ?? null,
+      ]
     );
 
     // Add user interests if provided
-    if (interests && interests.length > 0) {
+    if (Array.isArray(interests) && interests.length > 0) {
+      const placeholders = interests.map((_, i) => `($1, $${i + 2})`).join(',');
 
-      const interestValues = interests.map((interestId) => [
-        userId,
-        interestId,
-      ]);
+      const values = [userId, ...interests];
 
       await pool.query(
-        `INSERT INTO user_interests (user_id, interest_id) VALUES ($1)`,
-        [interestValues]
-      );
-
-      await pool.query(
-        `INSERT INTO user_interests (user_id, interest_id)
-     VALUES ${placeholders.join(', ')}`,
+        `INSERT INTO user_interests (user_id, interest_id) VALUES ${placeholders}`,
         values
       );
     }
