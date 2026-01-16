@@ -10,6 +10,7 @@ export const SignupScreen = ({ coords }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const formData = useSelector((s) => s.auth.formData);
+  console.log(coords)
 
   const handleChange = (e) => {
     dispatch(setFormData({ [e.target.name]: e.target.value }));
@@ -23,8 +24,8 @@ export const SignupScreen = ({ coords }) => {
     const result = await dispatch(
       signupUser({
         ...formData,
-        latitude: coords?.latitude ?? null,
-        longitude: coords?.longitude ?? null,
+        location_lat: coords?.lat ?? null,
+        location_lng: coords?.lng ?? null,
         // interests: Array.isArray(selected) ? selected : [],
       })
     );
