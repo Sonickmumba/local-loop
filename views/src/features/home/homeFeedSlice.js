@@ -1,14 +1,22 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { createListing } from '../listings/listingsSlice';
+// import { useSelector } from 'react-redux';
 
 export const fetchHomeFeed = createAsyncThunk(
   'homeFeed/fetchHomeFeed',
   async (_, { rejectWithValue }) => {
     try {
+      // const user = useSelector((s) => s.auth.user);
       const res = await axios.get('http://localhost:3000/api/listings/', {
+        // params: {
+        //   lat: user?.location_lat,
+        //   lng: user?.location_lng,
+        // },
         withCredentials: true,
       });
+
+      console.log(res.data.data);
       return res.data.data;
     } catch (err) {
       if (err.response?.status === 401) {
@@ -30,9 +38,7 @@ const homeFeedSlice = createSlice({
   },
   reducers: {
     addListingRealtime: (state, action) => {
-      const exists = state.listings.some(
-        (l) => l.id === action.payload.id
-      );
+      const exists = state.listings.some((l) => l.id === action.payload.id);
       if (!exists) {
         state.listings.unshift(action.payload);
       }
