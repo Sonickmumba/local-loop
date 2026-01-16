@@ -14,8 +14,8 @@ exports.getAllListings = async (req, res, next) => {
         u.name AS author_name,
         u.neighborhood,
         u.rating AS author_rating,
-        u.location_lat AS author_lat,
-        u.location_lng AS author_lng,
+        u.location_lat,
+        u.location_lng,
         COALESCE(conversation_counts.conversation_count, 0) as responses_count
       FROM listings l
       JOIN users u ON l.user_id = u.id
@@ -61,22 +61,63 @@ exports.getAllListings = async (req, res, next) => {
 
     query += ` ORDER BY l.created_at DESC`;
 
-    const { rows: listings } = await pool.query(query, params);
+    let { rows: listings } = await pool.query(query, params);
+    
+    // Determine reference location (viewer context)
+    let refLat = null;
+    let refLng = null;
+
+    // Search-provided reference (highest priority)
+    if (lat && lng) {
+      refLat = parseFloat(lat);
+      refLng = parseFloat(lng);
+    }
+    // Fallback: authenticated user location
+    else if (req.user?.location_lat && req.user?.location_lng) {
+      refLat = parseFloat(req.user.location_lat);
+      refLng = parseFloat(req.user.location_lng);
+    }
 
     // Distance calculation (JS-based, same as original)
-    if (lat && lng) {
-      const userLat = parseFloat(lat);
-      const userLng = parseFloat(lng);
 
+    // if (lat && lng) {
+    //   const userLat = parseFloat(lat);
+    //   const userLng = parseFloat(lng);
+
+    //   listings.forEach((listing) => {
+    //     if (listing.location_lat && listing.location_lng) {
+    //       const distance = calculateDistance(
+    //         userLat,
+    //         userLng,
+    //         parseFloat(listing.location_lat),
+    //         parseFloat(listing.location_lng)
+    //       );
+    //       listing.distance = Number(distance.toFixed(1));
+    //     }
+    //   });
+
+    //   if (radius) {
+    //     const r = parseFloat(radius);
+    //     listings = listings.filter(
+    //       (l) => typeof l.distance === 'number' && l.distance <= r
+    //     );
+    //   }
+    // }
+
+
+
+    if (refLat !== null && refLng !== null) {
       listings.forEach((listing) => {
         if (listing.location_lat && listing.location_lng) {
           const distance = calculateDistance(
-            userLat,
-            userLng,
+            refLat,
+            refLng,
             parseFloat(listing.location_lat),
             parseFloat(listing.location_lng)
           );
           listing.distance = Number(distance.toFixed(1));
+        } else {
+          listing.distance = null;
         }
       });
 
@@ -193,8 +234,8 @@ exports.createListing = async (req, res, next) => {
         u.name AS author_name,
         u.neighborhood,
         u.rating AS author_rating,
-        u.location_lat AS author_lat,
-        u.location_lng AS author_lng,
+        u.location_lat,
+        u.location_lng,
         COALESCE(conversation_counts.conversation_count, 0) as responses_count
       FROM listings l
       JOIN users u ON l.user_id = u.id
@@ -208,6 +249,7 @@ exports.createListing = async (req, res, next) => {
     );
 
     const listing = newListingResult.rows[0];
+    console.log('first-listing',listing)
 
     // Add timeAgo
     listing.timeAgo = timeAgo(listing.created_at);
@@ -242,6 +284,8 @@ exports.createListing = async (req, res, next) => {
       console.error('Error creating notifications:', notificationError);
       // Don't fail the listing creation if notifications fail
     }
+
+    console.log('last listing:',listing)
 
     res.status(201).json({
       success: true,
