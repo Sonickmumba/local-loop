@@ -1,8 +1,143 @@
-import { MapPin } from 'lucide-react';
+// import { MapPin } from 'lucide-react';
 
+// import { useState } from 'react';
+// import { useDispatch } from 'react-redux';
+// import { useNavigate } from 'react-router-dom';
+// import { reverseGeocode } from '../../features/util/geocoding';
+// import {
+//   setPermission,
+//   setCoords,
+//   setCityCountry,
+// } from '../../features/location/locationPermissionSlice';
+
+
+// export const LocationPermissionScreen = () => {
+//   const navigate = useNavigate();
+//   const dispatch = useDispatch();
+//   const [loading, setLoading] = useState(false);
+//   const [errorMsg, setErrorMsg] = useState('');
+
+//   const handleAllow = () => {
+//     if (!navigator.geolocation) {
+//       setErrorMsg('Geolocation is not supported by your browser.');
+//       dispatch(setPermission('denied'));
+//       navigate('/');
+//       return;
+//     }
+//     // request geolocation
+//     setLoading(true);
+//     navigator.geolocation.getCurrentPosition(
+//       async (pos) => {
+//         console.log('Geolocation success:', pos.coords);
+//         setLoading(false);
+//         const { latitude, longitude } = pos.coords;
+        
+//         dispatch(setPermission('granted'));
+//         dispatch(setCoords({ lat: latitude, lng: longitude }));
+
+//         // Reverse-geocode to get the sit and country
+//         try {
+//           const { city, country } = await reverseGeocode(latitude, longitude);
+//           dispatch(setCityCountry({ city, country }));
+//         } catch (err) {
+//           console.warn('Reverse geocode failed:', err);
+//         }
+        
+//         navigate('/interests');
+//       },
+//       (error) => {
+//         setLoading(false);
+//         console.warn('Location permission denied or error:', error.message);
+//         setErrorMsg('Location access was denied. You can still use the app.');
+//         dispatch(setPermission('denied'));
+//         navigate('/interests');
+//       },
+//       { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
+//     );
+//   };
+
+//   const handleSkip = () => {
+//     dispatch(setPermission('denied'));
+//     navigate('/interests');
+//   };
+
+//   return (
+//     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gray-50">
+//       <div className="w-full max-w-md">
+//         <div className="text-center mb-12">
+//           <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+//             <MapPin className="w-12 h-12 text-blue-600" />
+//           </div>
+//           <h1 className="mb-4">Enable Location</h1>
+//           <p className="text-lg text-gray-600">
+//             We need your location to connect you with neighbors in your area
+//           </p>
+//           {errorMsg && <p className="mt-2 text-sm text-red-500">{errorMsg}</p>}
+//         </div>
+
+//         <div className="space-y-4 mb-8">
+//           <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-200">
+//             <div className="text-2xl">🎯</div>
+//             <div>
+//               <div className="mb-1">Find nearby requests</div>
+//               <p className="text-sm text-gray-600">
+//                 See what's happening in your neighborhood
+//               </p>
+//             </div>
+//           </div>
+
+//           <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-200">
+//             <div className="text-2xl">🗺️</div>
+//             <div>
+//               <div className="mb-1">Map view</div>
+//               <p className="text-sm text-gray-600">
+//                 Browse requests on an interactive map
+//               </p>
+//             </div>
+//           </div>
+
+//           <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-200">
+//             <div className="text-2xl">🔒</div>
+//             <div>
+//               <div className="mb-1">Privacy protected</div>
+//               <p className="text-sm text-gray-600">
+//                 Your exact location is never shared
+//               </p>
+//             </div>
+//           </div>
+//         </div>
+
+//         <div className="space-y-3">
+//           <button
+//             onClick={handleAllow}
+//             disabled={loading}
+//             className={`w-full py-4 rounded-full text-white transition-colors ${
+//             loading ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+//           }`}
+//             // className="w-full bg-blue-600 text-white py-4 rounded-full hover:bg-blue-700 transition-colors"
+//           >
+//             {loading ? 'Allowing...' : 'Allow Location Access'}
+//           </button>
+
+//           <button
+//             onClick={handleSkip}
+//             className="w-full bg-white text-gray-700 py-4 rounded-full border border-gray-300 hover:bg-gray-50 transition-colors"
+//           >
+//             Skip for Now
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+
+
+import { MapPin } from 'lucide-react';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+
 import { reverseGeocode } from '../../features/util/geocoding';
 import {
   setPermission,
@@ -10,50 +145,86 @@ import {
   setCityCountry,
 } from '../../features/location/locationPermissionSlice';
 
-
 export const LocationPermissionScreen = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const handleAllow = () => {
+  // Promise wrapper for geolocation
+  const requestLocation = (options) =>
+    new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, options);
+    });
+
+  const handleAllow = async () => {
     if (!navigator.geolocation) {
       setErrorMsg('Geolocation is not supported by your browser.');
       dispatch(setPermission('denied'));
-      navigate('/');
+      navigate('/interests');
       return;
     }
-    // request geolocation
-    setLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        console.log('Geolocation success:', pos.coords);
-        setLoading(false);
-        const { latitude, longitude } = pos.coords;
-        
-        dispatch(setPermission('granted'));
-        dispatch(setCoords({ lat: latitude, lng: longitude }));
 
-        // Reverse-geocode to get the sit and country
-        try {
-          const { city, country } = await reverseGeocode(latitude, longitude);
-          dispatch(setCityCountry({ city, country }));
-        } catch (err) {
-          console.warn('Reverse geocode failed:', err);
+    setLoading(true);
+    setErrorMsg('');
+
+    try {
+      let position;
+
+      try {
+        // First attempt (normal)
+        position = await requestLocation({
+          enableHighAccuracy: false,
+          timeout: 8000,
+          maximumAge: 60000, // allow cached location
+        });
+        console.log(position)
+      } catch (err) {
+        // Retry once if timeout
+        if (err.code === err.TIMEOUT) {
+          position = await requestLocation({
+            enableHighAccuracy: false,
+            timeout: 15000,
+            maximumAge: 300000,
+          });
+        } else {
+          throw err;
         }
-        
-        navigate('/interests');
-      },
-      (error) => {
-        setLoading(false);
-        console.warn('Location permission denied or error:', error.message);
-        setErrorMsg('Location access was denied. You can still use the app.');
+      }
+
+      const { latitude, longitude } = position.coords;
+      console.log(latitude, longitude)
+
+      dispatch(setPermission('granted'));
+      dispatch(setCoords({ lat: latitude, lng: longitude }));
+
+      // Reverse geocode (non-blocking)
+      try {
+        const { city, country } = await reverseGeocode(latitude, longitude);
+        dispatch(setCityCountry({ city, country }));
+      } catch (geoErr) {
+        console.warn('Reverse geocoding failed:', geoErr);
+      }
+
+      navigate('/interests');
+    } catch (error) {
+      // Handle errors correctly
+      if (error.code === error.PERMISSION_DENIED) {
+        setErrorMsg('Location permission was denied.');
         dispatch(setPermission('denied'));
-        navigate('/interests');
-      },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
-    );
+      } else if (error.code === error.TIMEOUT) {
+        setErrorMsg('Unable to determine your location in time.');
+        dispatch(setPermission('unknown'));
+      } else {
+        setErrorMsg('Location information is unavailable.');
+        dispatch(setPermission('unknown'));
+      }
+
+      navigate('/interests');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSkip = () => {
@@ -68,20 +239,31 @@ export const LocationPermissionScreen = () => {
           <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <MapPin className="w-12 h-12 text-blue-600" />
           </div>
-          <h1 className="mb-4">Enable Location</h1>
+
+          <h1 className="mb-4 text-2xl font-semibold">
+            Enable Location
+          </h1>
+
           <p className="text-lg text-gray-600">
-            We need your location to connect you with neighbors in your area
+            We use your location to show nearby requests and activity.
           </p>
-          {errorMsg && <p className="mt-2 text-sm text-red-500">{errorMsg}</p>}
+
+          {errorMsg && (
+            <p className="mt-3 text-sm text-red-500">
+              {errorMsg}
+            </p>
+          )}
         </div>
 
         <div className="space-y-4 mb-8">
           <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-200">
             <div className="text-2xl">🎯</div>
             <div>
-              <div className="mb-1">Find nearby requests</div>
+              <div className="font-medium mb-1">
+                Find nearby requests
+              </div>
               <p className="text-sm text-gray-600">
-                See what's happening in your neighborhood
+                Discover what’s happening in your area
               </p>
             </div>
           </div>
@@ -89,9 +271,11 @@ export const LocationPermissionScreen = () => {
           <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-200">
             <div className="text-2xl">🗺️</div>
             <div>
-              <div className="mb-1">Map view</div>
+              <div className="font-medium mb-1">
+                Map view
+              </div>
               <p className="text-sm text-gray-600">
-                Browse requests on an interactive map
+                Explore requests visually on a map
               </p>
             </div>
           </div>
@@ -99,7 +283,9 @@ export const LocationPermissionScreen = () => {
           <div className="flex items-start gap-3 p-4 bg-white rounded-lg border border-gray-200">
             <div className="text-2xl">🔒</div>
             <div>
-              <div className="mb-1">Privacy protected</div>
+              <div className="font-medium mb-1">
+                Privacy protected
+              </div>
               <p className="text-sm text-gray-600">
                 Your exact location is never shared
               </p>
@@ -112,11 +298,12 @@ export const LocationPermissionScreen = () => {
             onClick={handleAllow}
             disabled={loading}
             className={`w-full py-4 rounded-full text-white transition-colors ${
-            loading ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-          }`}
-            // className="w-full bg-blue-600 text-white py-4 rounded-full hover:bg-blue-700 transition-colors"
+              loading
+                ? 'bg-blue-300 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
-            {loading ? 'Allowing...' : 'Allow Location Access'}
+            {loading ? 'Detecting location…' : 'Allow Location Access'}
           </button>
 
           <button
