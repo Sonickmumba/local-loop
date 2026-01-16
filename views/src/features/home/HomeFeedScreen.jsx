@@ -63,6 +63,8 @@ export function HomeFeedScreen() {
     );
   }
 
+  console.log(listings)
+
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
