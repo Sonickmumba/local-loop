@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin, Clock, MessageSquare, User } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 export const ListingDetails = () => {
   const navigate = useNavigate();
@@ -12,7 +13,42 @@ export const ListingDetails = () => {
   const [listing, setListing] = useState(null);
   const [error, setError] = useState(null);
 
+  const isSelfListing = user?.id === listing?.user_id;
+  const isDisabled = !user || isSelfListing;
+
   const [similarListings, setSimilarListings] = useState([]);
+
+  const handleSendMessage = async () => {
+    if (isDisabled) return;
+    const toastId = toast.loading('Cannot create conversation with yourself!');
+    if (!user) {
+      navigate('/auth/signin');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        'http://localhost:3000/api/conversations',
+        {
+          listingId: listing.id, // <-- listing ID
+          participantId: listing.user_id, // <-- listing owner ID
+        },
+        { withCredentials: true }
+      );
+      // Optional: Add slight delay for better UX
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      navigate(`/chat-conversation?chatId=${response.data.data.id}`);
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to create conversation';
+
+      toast.error(errorMessage, { id: toastId });
+    }
+  };
 
   useEffect(() => {
     const fetchSimilarListings = async () => {
@@ -91,7 +127,7 @@ export const ListingDetails = () => {
     return <div>Loading...</div>;
   }
 
-  console.log(listing)
+  console.log(listing);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -207,42 +243,16 @@ export const ListingDetails = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
         <div className="max-w-2xl mx-auto">
           <button
-            // onClick={() =>
-            //   navigate('/chat-conversation', {
-            //     state: { chatId: listing.id },
-            //   })
-            // }
-            onClick={() => {
-              if (!user) {
-                navigate('/auth/signin');
-                return;
-              }
-              if (!listing.id || !listing.user_id) {
-                console.error('Listing ID or owner ID is missing!');
-                return;
-              }
-
-              axios
-                .post(
-                  'http://localhost:3000/api/conversations',
-                  {
-                    listingId: listing.id, // <-- listing ID
-                    participantId: listing.user_id, // <-- listing owner ID
-                  },
-                  { withCredentials: true } // important if using cookie-based auth
-                )
-                .then((res) => {
-                  const conversationId = res.data.data.id;
-                  navigate(`/chat-conversation?chatId=${conversationId}`);
-                })
-                .catch((err) =>
-                  console.error(
-                    'Error creating conversation:',
-                    err.response?.data || err
-                  )
-                );
-            }}
-            className="w-full bg-blue-600 text-white py-4 rounded-full hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+            disabled={isDisabled}
+            onClick={handleSendMessage}
+            className={`
+        w-full py-4 rounded-full transition-colors flex items-center justify-center gap-2
+        ${
+          isDisabled
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-70'
+            : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800'
+        }
+      `}
           >
             <MessageSquare className="w-5 h-5" />
             Send Message
