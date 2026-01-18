@@ -4,7 +4,6 @@ import { ArrowLeft, MapPin, Clock, MessageSquare, User } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import toast from 'react-hot-toast';
 
 export const ListingDetails = () => {
   const navigate = useNavigate();
@@ -20,7 +19,7 @@ export const ListingDetails = () => {
 
   const handleSendMessage = async () => {
     if (isDisabled) return;
-    const toastId = toast.loading('Cannot create conversation with yourself!');
+    
     if (!user) {
       navigate('/auth/signin');
       return;
@@ -39,14 +38,9 @@ export const ListingDetails = () => {
       await new Promise((resolve) => setTimeout(resolve, 300));
       navigate(`/chat-conversation?chatId=${response.data.data.id}`);
     } catch (error) {
-      console.error('Error creating conversation:', error);
-
-      const errorMessage =
-        error.response?.data?.message ||
+      console.error(error.response?.data?.message ||
         error.message ||
-        'Failed to create conversation';
-
-      toast.error(errorMessage, { id: toastId });
+        'Failed to create conversation');
     }
   };
 
