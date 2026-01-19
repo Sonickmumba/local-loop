@@ -132,6 +132,8 @@ export const ListingDetails = () => {
     return <div>Loading...</div>;
   }
 
+  console.log(listing)
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
