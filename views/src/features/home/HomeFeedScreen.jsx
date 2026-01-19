@@ -23,8 +23,10 @@ export function HomeFeedScreen() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
+
   const { listings, status, error } = useHomeFeed();
   const user = useSelector((s) => s.auth.user);
+  
   const [activeTab, setActiveTab] = useState('all');
 
   const filteredListings = listings.filter((listing) => {
