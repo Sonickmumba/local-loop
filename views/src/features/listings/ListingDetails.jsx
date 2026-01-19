@@ -19,7 +19,6 @@ export const ListingDetails = () => {
   const [listing, setListing] = useState(
     location.state?.listing || listingFromRedux || null
   );
-  // const [listing, setListing] = useState(null);
   const [error, setError] = useState(null);
 
   const isSelfListing = user?.id === listing?.user_id;
@@ -32,6 +31,7 @@ export const ListingDetails = () => {
       fetchListing();
     }
     fetchSimilarListings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listingId]);
 
   const handleSendMessage = async () => {
@@ -62,13 +62,7 @@ export const ListingDetails = () => {
       );
     }
   };
-
-  // useEffect(() => {
-  //   fetchListing();
-  //   fetchSimilarListings();
-  // }, [listingId]);
-
-  // Fetch listing details from API
+  
   async function fetchListing() {
     try {
       const response = await fetch(
@@ -137,8 +131,6 @@ export const ListingDetails = () => {
   if (!listing) {
     return <div>Loading...</div>;
   }
-
-  console.log(listing);
 
   return (
     <div className="min-h-screen bg-gray-50">
