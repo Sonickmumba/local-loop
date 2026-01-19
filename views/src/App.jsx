@@ -35,6 +35,7 @@ import { TradeManagementScreen } from './features/trade/TradeManagementScreen.js
 import { ReviewRating } from './features/review/ReviewRating';
 import { Toaster } from 'react-hot-toast';
 
+
 function App() {
   const dispatch = useDispatch();
   const initialized = useSelector((s) => s.auth.initialized);
