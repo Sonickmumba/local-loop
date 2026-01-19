@@ -3,16 +3,12 @@ import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { createListing } from './listingsSlice';
-// import { fetchHomeFeed } from '../home/homeFeedSlice';
-// import { useHomeFeed } from '../../hooks/useHomeFeed';
 
 export const CreateListing = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const creating = useSelector((s) => s.listings.creating);
-
-  // const { refetch } = useHomeFeed();
 
 
   const [formData, setFormData] = useState({
