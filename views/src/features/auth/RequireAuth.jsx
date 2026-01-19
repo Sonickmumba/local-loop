@@ -7,7 +7,7 @@ export const RequireAuth = ({ children }) => {
 
   // Wait until session bootstrap finishes
   if (!initialized) {
-    return <div className="min-h-screen flex items-center justify-center">Loading…</div>; // or a spinner if you prefer
+    return <div className="min-h-screen flex items-center justify-center">Loading…</div>; // or a spinner if i prefer
   }
 
   if (!user) {
