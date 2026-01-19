@@ -3,15 +3,11 @@ import { MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const ListingCard = ({ listing }) => {
-  // const navigate = useNavigate();
-  console.log(listing);
 
   return (
     <Link
       to={`/listing-details/${listing.id}`}
       state={{ listing }}
-      // onClick={() => navigate(`/listing-details/${listing.id}`)}
-      // className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
       className="block no-underline text-inherit"
     >
       <div className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
