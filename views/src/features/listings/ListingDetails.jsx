@@ -3,14 +3,22 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, MapPin, Clock, MessageSquare, User } from 'lucide-react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+
+import { useDispatch } from 'react-redux';
+import { fetchUserById } from '../user/userThunks';
+import { selectUserById } from '../user/userSelectors';
+// import { UserProfile } from '@/components/UserProfile';
+
 import axios from 'axios';
 
 export const ListingDetails = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const location = useLocation();
   const { listingId } = useParams();
 
   const user = useSelector((state) => state.auth.user);
+
   const listingsFromStore = useSelector((s) => s.homeFeed.listings);
   const listingFromRedux = listingsFromStore.find(
     (l) => String(l.id) === listingId
@@ -21,10 +29,22 @@ export const ListingDetails = () => {
   );
   const [error, setError] = useState(null);
 
+  const ownerId = listing?.user_id;
+
+  const owner = useSelector((state) =>
+    ownerId ? selectUserById(state, ownerId) : null
+  );
+
   const isSelfListing = user?.id === listing?.user_id;
   const isDisabled = !user || isSelfListing;
 
   const [similarListings, setSimilarListings] = useState([]);
+
+  useEffect(() => {
+    if (ownerId && !owner) {
+      dispatch(fetchUserById(ownerId));
+    }
+  }, [ownerId, owner, dispatch]);
 
   useEffect(() => {
     if (!listing) {
@@ -62,7 +82,7 @@ export const ListingDetails = () => {
       );
     }
   };
-  
+
   async function fetchListing() {
     try {
       const response = await fetch(
@@ -129,10 +149,14 @@ export const ListingDetails = () => {
   }
 
   if (!listing) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        Loading…
+      </div>
+    );
   }
 
-  console.log(listing)
+  console.log(listing);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -186,7 +210,7 @@ export const ListingDetails = () => {
             </div>
             <div className="flex items-center gap-2 text-gray-600">
               <MessageSquare className="w-5 h-5" />
-              <span>{listing.responses_count} people responded</span>
+              <span>{listing.responses_count ?? 0} people responded</span>
             </div>
           </div>
         </div>
@@ -194,25 +218,34 @@ export const ListingDetails = () => {
         {/* Author Info */}
         <div className="bg-white border-b border-gray-200 p-6">
           <div className="mb-3 text-gray-600">Posted by</div>
-          <button
-            onClick={() => navigate(`/user-profile/${listing.user_id}`)}
+          {
+            owner ? (
+              <button
+            onClick={() => navigate(`/user-profile/${owner.id}`)}
             className="flex items-center gap-3 w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
-              {listing.author_name
+              {owner.name
                 .split(' ')
                 .map((n) => n[0])
                 .join('')}
             </div>
             <div className="flex-1 text-left">
-              <div className="mb-1">{listing.author_name}</div>
+              <div className="mb-1">{owner.name}</div>
               <div className="text-sm text-gray-600">
-                ⭐ {listing.author_rating} • {listing.completed_trades} trades
+                ⭐ {owner.rating ?? 0} • {owner.completed_trades ?? 0} trades
                 completed
               </div>
             </div>
             <User className="w-5 h-5 text-gray-400" />
           </button>
+            ) : (
+              (
+            <div className="text-sm text-gray-500">Loading profile…</div>
+          )
+            )
+          }
+          
         </div>
 
         {/* Related Listings */}
@@ -235,8 +268,9 @@ export const ListingDetails = () => {
                   </div>
                   <div className="mb-2">{listing.title}</div>
                   <div className="text-sm text-gray-600">
-                    {listing?.neighborhood}
+                    {listing?.neighborhood} • {listing.distance} km
                   </div>
+                  {/* <div className="text-sm text-gray-600"> • 1.5 mi</div> */}
                 </div>
               ))}
             </div>
