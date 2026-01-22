@@ -31,7 +31,6 @@ import './App.css';
 import { NotificationsScreen } from './features/notification/NotificationsScreen.jsx';
 import { TradeNegotiationScreen } from './features/trade/TradeNegotiatonScreen.jsx';
 import { TradeManagementScreen } from './features/trade/TradeManagementScreen.jsx';
-// import { ReviewRatingScreen } from './features/review/reviewRatingScreen.jsx';
 import { ReviewRating } from './features/review/ReviewRating';
 import { Toaster } from 'react-hot-toast';
 
@@ -39,10 +38,8 @@ import { Toaster } from 'react-hot-toast';
 function App() {
   const dispatch = useDispatch();
   const initialized = useSelector((s) => s.auth.initialized);
-
-  // Location permission and coordinates from Redux store
+  
   const { coords } = useSelector((s) => s.location);
-  console.log(coords)
 
   useEffect(() => {
     dispatch(bootstrapSession());
