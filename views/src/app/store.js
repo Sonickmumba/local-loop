@@ -4,6 +4,7 @@ import authReducer from '../features/auth/authSlice';
 import homeFeedReducer from '../features/home/homeFeedSlice';
 import listingsReducer from '../features/listings/listingsSlice';
 import notificationsReducer from '../features/notification/notificationsSlice';
+import userReducer from '../features/user/userSlice';
 
 const store = configureStore({
   reducer: {
@@ -12,6 +13,8 @@ const store = configureStore({
     homeFeed: homeFeedReducer,
     listings: listingsReducer,
     notifications: notificationsReducer,
+    user: userReducer,
+    
   },
 });
 

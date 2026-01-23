@@ -1,15 +1,32 @@
 // import { Screen } from '../App';
 import { useState, useEffect } from 'react';
 import { ArrowLeft, MapPin, Clock, MessageSquare, User } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+
+import { useDispatch } from 'react-redux';
+import { fetchUserById } from '../user/userThunks';
+import { selectUserById } from '../user/userSelectors';
+// import { UserProfile } from '@/components/UserProfile';
+
 import axios from 'axios';
 
 export const ListingDetails = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const location = useLocation();
   const { listingId } = useParams();
+
   const user = useSelector((state) => state.auth.user);
-  const [listing, setListing] = useState(null);
+
+  const listingsFromStore = useSelector((s) => s.homeFeed.listings);
+  const listingFromRedux = listingsFromStore.find(
+    (l) => String(l.id) === String(listingId)
+  );
+
+  const [listing, setListing] = useState(
+    location.state?.listing || listingFromRedux || null
+  );
   const [error, setError] = useState(null);
 
   const isSelfListing = user?.id === listing?.user_id;
@@ -17,9 +34,33 @@ export const ListingDetails = () => {
 
   const [similarListings, setSimilarListings] = useState([]);
 
+  useEffect(() => {
+    setListing(null);
+    setError(null);
+    setSimilarListings([]);
+  }, [listingId]);
+
+  const ownerId = listing?.user_id;
+
+  const owner = useSelector((state) =>
+    ownerId ? selectUserById(state, ownerId) : null
+  );
+
+  useEffect(() => {
+    if (ownerId && !owner) {
+      dispatch(fetchUserById(ownerId));
+    }
+  }, [ownerId, owner, dispatch]);
+
+  useEffect(() => {
+    fetchListing();
+    fetchSimilarListings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listingId]);
+
   const handleSendMessage = async () => {
     if (isDisabled) return;
-    
+
     if (!user) {
       navigate('/auth/signin');
       return;
@@ -29,8 +70,8 @@ export const ListingDetails = () => {
       const response = await axios.post(
         'http://localhost:3000/api/conversations',
         {
-          listingId: listing.id, // <-- listing ID
-          participantId: listing.user_id, // <-- listing owner ID
+          listingId: listing.id,
+          participantId: listing.user_id,
         },
         { withCredentials: true }
       );
@@ -38,68 +79,60 @@ export const ListingDetails = () => {
       await new Promise((resolve) => setTimeout(resolve, 300));
       navigate(`/chat-conversation?chatId=${response.data.data.id}`);
     } catch (error) {
-      console.error(error.response?.data?.message ||
-        error.message ||
-        'Failed to create conversation');
+      console.error(
+        error.response?.data?.message ||
+          error.message ||
+          'Failed to create conversation'
+      );
     }
   };
 
-  useEffect(() => {
-    const fetchSimilarListings = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:3000/api/listings/${listingId}/similar`,
-          { credentials: 'include' }
-        );
+  async function fetchListing() {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/listings/${listingId}`,
+        { credentials: 'include' }
+      );
 
-        if (res.status === 401) {
-          // User not authenticated, redirect will be handled by RequireAuth
-          return;
-        }
-
-        if (!res.ok) {
-          throw new Error('Failed to fetch similar listings');
-        }
-
-        const data = await res.json();
-
-        if (data.success) {
-          setSimilarListings(data.data);
-        }
-      } catch (error) {
-        console.error('Error fetching similar listings:', error);
-        // Don't set error state, just log it
+      if (response.status === 401) {
+        return;
       }
-    };
 
-    // Fetch listing details from API
-    async function fetchListing() {
-      try {
-        const response = await fetch(
-          `http://localhost:3000/api/listings/${listingId}`,
-          { credentials: 'include' }
-        );
-
-        if (response.status === 401) {
-          // User not authenticated, redirect will be handled by RequireAuth
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch listing');
-        }
-
-        const result = await response.json();
-        setListing(result.data);
-      } catch (error) {
-        console.error('Error fetching listing:', error);
-        setError('Failed to load listing');
+      if (!response.ok) {
+        throw new Error('Failed to fetch listing');
       }
+
+      const result = await response.json();
+      setListing(result.data);
+    } catch {
+      setError('Failed to load listing');
     }
+  }
 
-    fetchListing();
-    fetchSimilarListings();
-  }, [listingId]);
+  const fetchSimilarListings = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:3000/api/listings/${listingId}/similar`,
+        { credentials: 'include' }
+      );
+
+      if (res.status === 401) {
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch similar listings');
+      }
+
+      const data = await res.json();
+
+      if (data.success) {
+        setSimilarListings(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching similar listings:', error);
+    }
+  };
 
   if (error) {
     return (
@@ -118,7 +151,11 @@ export const ListingDetails = () => {
   }
 
   if (!listing) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        Loading…
+      </div>
+    );
   }
 
   console.log(listing);
@@ -166,7 +203,7 @@ export const ListingDetails = () => {
             <div className="flex items-center gap-2 text-gray-600">
               <MapPin className="w-5 h-5" />
               <span>
-                {listing.neighborhood} • {listing.distance} away
+                {listing.neighborhood} • {listing.distance} km away
               </span>
             </div>
             <div className="flex items-center gap-2 text-gray-600">
@@ -175,7 +212,7 @@ export const ListingDetails = () => {
             </div>
             <div className="flex items-center gap-2 text-gray-600">
               <MessageSquare className="w-5 h-5" />
-              <span>{listing.responses_count} people responded</span>
+              <span>{listing.responses_count ?? 0} people responded</span>
             </div>
           </div>
         </div>
@@ -183,25 +220,29 @@ export const ListingDetails = () => {
         {/* Author Info */}
         <div className="bg-white border-b border-gray-200 p-6">
           <div className="mb-3 text-gray-600">Posted by</div>
-          <button
-            onClick={() => navigate(`/user-profile/${listing.user_id}`)}
-            className="flex items-center gap-3 w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
-              {listing.authors_name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')}
-            </div>
-            <div className="flex-1 text-left">
-              <div className="mb-1">{listing.authors_name}</div>
-              <div className="text-sm text-gray-600">
-                ⭐ {listing.author_rating} • {listing.completed_trades} trades
-                completed
+          {owner ? (
+            <button
+              onClick={() => navigate(`/user-profile/${owner.id}`)}
+              className="flex items-center gap-3 w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
+                {owner.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')}
               </div>
-            </div>
-            <User className="w-5 h-5 text-gray-400" />
-          </button>
+              <div className="flex-1 text-left">
+                <div className="mb-1">{owner.name}</div>
+                <div className="text-sm text-gray-600">
+                  ⭐ {owner.rating ?? 0} • {owner.completed_trades ?? 0} trades
+                  completed
+                </div>
+              </div>
+              <User className="w-5 h-5 text-gray-400" />
+            </button>
+          ) : (
+            <div className="text-sm text-gray-500">Loading profile…</div>
+          )}
         </div>
 
         {/* Related Listings */}
@@ -211,21 +252,22 @@ export const ListingDetails = () => {
             <p className="text-sm text-gray-500">No similar listings found.</p>
           ) : (
             <div className="space-y-3">
-              {similarListings.map((listing) => (
+              {similarListings.map((item) => (
                 <div
-                  key={listing.id}
+                  key={item.id}
                   className="bg-white rounded-lg border border-gray-200 p-4"
-                  onClick={() => navigate(`/home/listings/${listing.id}`)}
+                  onClick={() => navigate(`/listing-details/${item.id}`)}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
-                      {listing.category}
+                      {item.category}
                     </span>
                   </div>
-                  <div className="mb-2">{listing.title}</div>
+                  <div className="mb-2">{item.title}</div>
                   <div className="text-sm text-gray-600">
-                    {listing?.neighborhood}
+                    {item?.neighborhood} • {item.distance} km
                   </div>
+                  {/* <div className="text-sm text-gray-600"> • 1.5 mi</div> */}
                 </div>
               ))}
             </div>

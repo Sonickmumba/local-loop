@@ -202,6 +202,7 @@ export const LocationPermissionScreen = () => {
       // Reverse geocode (non-blocking)
       try {
         const { city, country } = await reverseGeocode(latitude, longitude);
+        console.log(city, country)
         dispatch(setCityCountry({ city, country }));
       } catch (geoErr) {
         console.warn('Reverse geocoding failed:', geoErr);

@@ -17,14 +17,15 @@ import { ListingCard } from '../../components/ListingCard';
 import { FilterTabs } from '../../components/FilterTabs';
 import { addListingRealtime } from './homeFeedSlice';
 import socket from '../util/socket';
-// import { useAuth } from '../../hooks/useAuth';
 
 export function HomeFeedScreen() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
+
   const { listings, status, error } = useHomeFeed();
   const user = useSelector((s) => s.auth.user);
+
   const [activeTab, setActiveTab] = useState('all');
 
   const filteredListings = listings.filter((listing) => {
@@ -62,8 +63,6 @@ export function HomeFeedScreen() {
       </div>
     );
   }
-
-  console.log(listings)
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">

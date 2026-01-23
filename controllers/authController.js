@@ -112,61 +112,6 @@ exports.register = async (req, res, next) => {
   }
 };
 
-// Login user
-// exports.login = async (req, res, next) => {
-//   try {
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({
-//         success: false,
-//         errors: errors.array(),
-//       });
-//     }
-
-//     const { email, password } = req.body;
-
-//     // Find user
-//     const result = await pool.query(
-//       'SELECT id, name, email, password_hash FROM users WHERE email = $1',
-//       [email]
-//     );
-
-//     if (result.rowCount === 0) {
-//       return res.status(401).json({
-//         success: false,
-//         message: 'Invalid email or password',
-//       });
-//     }
-
-//     const user = result.rows[0];
-
-//     // Check password
-//     const isValidPassword = await bcrypt.compare(password, user.password_hash);
-//     if (!isValidPassword) {
-//       return res.status(401).json({
-//         success: false,
-//         message: 'Invalid email or password',
-//       });
-//     }
-
-//     // Set user session
-//     req.session.userId = user.id;
-//     req.session.email = user.email;
-
-//     res.json({
-//       success: true,
-//       message: 'Login successful',
-//       data: {
-//         id: user.id,
-//         name: user.name,
-//         email: user.email,
-//       },
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
 exports.login = (req, res, next) => {
   res.json({
     success: true,
