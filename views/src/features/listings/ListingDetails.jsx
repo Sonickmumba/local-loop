@@ -21,7 +21,7 @@ export const ListingDetails = () => {
 
   const listingsFromStore = useSelector((s) => s.homeFeed.listings);
   const listingFromRedux = listingsFromStore.find(
-    (l) => String(l.id) === listingId
+    (l) => String(l.id) === String(listingId)
   );
 
   const [listing, setListing] = useState(
@@ -29,16 +29,22 @@ export const ListingDetails = () => {
   );
   const [error, setError] = useState(null);
 
+  const isSelfListing = user?.id === listing?.user_id;
+  const isDisabled = !user || isSelfListing;
+
+  const [similarListings, setSimilarListings] = useState([]);
+
+  useEffect(() => {
+    setListing(null);
+    setError(null);
+    setSimilarListings([]);
+  }, [listingId]);
+
   const ownerId = listing?.user_id;
 
   const owner = useSelector((state) =>
     ownerId ? selectUserById(state, ownerId) : null
   );
-
-  const isSelfListing = user?.id === listing?.user_id;
-  const isDisabled = !user || isSelfListing;
-
-  const [similarListings, setSimilarListings] = useState([]);
 
   useEffect(() => {
     if (ownerId && !owner) {
@@ -47,9 +53,7 @@ export const ListingDetails = () => {
   }, [ownerId, owner, dispatch]);
 
   useEffect(() => {
-    if (!listing) {
-      fetchListing();
-    }
+    fetchListing();
     fetchSimilarListings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listingId]);
@@ -66,8 +70,8 @@ export const ListingDetails = () => {
       const response = await axios.post(
         'http://localhost:3000/api/conversations',
         {
-          listingId: listing.id, // <-- listing ID
-          participantId: listing.user_id, // <-- listing owner ID
+          listingId: listing.id,
+          participantId: listing.user_id,
         },
         { withCredentials: true }
       );
@@ -91,7 +95,6 @@ export const ListingDetails = () => {
       );
 
       if (response.status === 401) {
-        // User not authenticated, redirect will be handled by RequireAuth
         return;
       }
 
@@ -114,7 +117,6 @@ export const ListingDetails = () => {
       );
 
       if (res.status === 401) {
-        // User not authenticated, redirect will be handled by RequireAuth
         return;
       }
 
@@ -218,34 +220,29 @@ export const ListingDetails = () => {
         {/* Author Info */}
         <div className="bg-white border-b border-gray-200 p-6">
           <div className="mb-3 text-gray-600">Posted by</div>
-          {
-            owner ? (
-              <button
-            onClick={() => navigate(`/user-profile/${owner.id}`)}
-            className="flex items-center gap-3 w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
-              {owner.name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')}
-            </div>
-            <div className="flex-1 text-left">
-              <div className="mb-1">{owner.name}</div>
-              <div className="text-sm text-gray-600">
-                ⭐ {owner.rating ?? 0} • {owner.completed_trades ?? 0} trades
-                completed
+          {owner ? (
+            <button
+              onClick={() => navigate(`/user-profile/${owner.id}`)}
+              className="flex items-center gap-3 w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white">
+                {owner.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')}
               </div>
-            </div>
-            <User className="w-5 h-5 text-gray-400" />
-          </button>
-            ) : (
-              (
+              <div className="flex-1 text-left">
+                <div className="mb-1">{owner.name}</div>
+                <div className="text-sm text-gray-600">
+                  ⭐ {owner.rating ?? 0} • {owner.completed_trades ?? 0} trades
+                  completed
+                </div>
+              </div>
+              <User className="w-5 h-5 text-gray-400" />
+            </button>
+          ) : (
             <div className="text-sm text-gray-500">Loading profile…</div>
-          )
-            )
-          }
-          
+          )}
         </div>
 
         {/* Related Listings */}
@@ -255,20 +252,20 @@ export const ListingDetails = () => {
             <p className="text-sm text-gray-500">No similar listings found.</p>
           ) : (
             <div className="space-y-3">
-              {similarListings.map((listing) => (
+              {similarListings.map((item) => (
                 <div
-                  key={listing.id}
+                  key={item.id}
                   className="bg-white rounded-lg border border-gray-200 p-4"
-                  onClick={() => navigate(`/listing-details/${listing.id}`)}
+                  onClick={() => navigate(`/listing-details/${item.id}`)}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <span className="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
-                      {listing.category}
+                      {item.category}
                     </span>
                   </div>
-                  <div className="mb-2">{listing.title}</div>
+                  <div className="mb-2">{item.title}</div>
                   <div className="text-sm text-gray-600">
-                    {listing?.neighborhood} • {listing.distance} km
+                    {item?.neighborhood} • {item.distance} km
                   </div>
                   {/* <div className="text-sm text-gray-600"> • 1.5 mi</div> */}
                 </div>
